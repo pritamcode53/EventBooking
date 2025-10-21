@@ -10,6 +10,15 @@ namespace backend.DTOs
         public int DurationDays { get; set; } = 1;  // For PerDay
     }
 
+     public class BookingDto
+    {
+        public int BookingId { get; set; }
+        public int VenueId { get; set; }
+        public int CustomerId { get; set; }
+        public decimal TotalPrice { get; set; }
+        public DateTime BookingDate { get; set; }
+        public BookingStatus Status { get; set; }
+    }
 
     public class UpdateBookingStatusDto
     {

@@ -55,9 +55,10 @@ builder.Services.AddScoped<BookingHelper>(sp =>
 {
     var bookingDAL = sp.GetRequiredService<BookingDAL>();
     var venueDAL = sp.GetRequiredService<VenueDAL>();
+    var paymentDAL = sp.GetRequiredService<PaymentDAL>();
     var mailService = sp.GetRequiredService<MailService>(); // inject MailService
     var userDAL = sp.GetRequiredService<UserDAL>();         // inject UserDAL for fetching owner/customer info
-    return new BookingHelper(bookingDAL, venueDAL, mailService, userDAL);
+    return new BookingHelper(bookingDAL, venueDAL, mailService, userDAL,paymentDAL);
 });
 // Review
 builder.Services.AddScoped<ReviewDAL>();
@@ -71,7 +72,15 @@ builder.Services.AddScoped<ReviewHelper>(sp =>
 // Home (for homepage venue listing)
 builder.Services.AddScoped<HomeDAL>();
 builder.Services.AddScoped<HomeHelper>();
+// Paymet 
+builder.Services.AddScoped<PaymentDAL>();
 
+// Register PaymentHelper
+builder.Services.AddScoped<PaymentHelper>(sp =>
+{
+    var paymentDAL = sp.GetRequiredService<PaymentDAL>();
+    return new PaymentHelper(paymentDAL);
+});
 
 // ---------------------- JWT Service ----------------------
 builder.Services.AddSingleton<JwtService>();

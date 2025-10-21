@@ -94,13 +94,17 @@ namespace backend.DAL
         public async Task<VenuePricing?> GetVenuePricingAsync(int venueId, PricingType type)
         {
             const string sql = "SELECT * FROM venue_pricings WHERE venueid = @VenueId AND type = @Type LIMIT 1";
-            if (_db.State != ConnectionState.Open) _db.Open();
+
+            if (_db.State != ConnectionState.Open) 
+                _db.Open();
+
             return await _db.QueryFirstOrDefaultAsync<VenuePricing>(sql, new
             {
-                VenueId = venueId,
-                Type = (int)type // store as integer
+                VenueId = venueId,        // matches INT column
+                Type = ((int)type).ToString()     // convert enum to string to match VARCHAR
             });
         }
+
 
         // ----------------- Get Pricing by ID -----------------
         public async Task<VenuePricing?> GetVenuePricingByIdAsync(int venuePricingId)

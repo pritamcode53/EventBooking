@@ -132,7 +132,6 @@ namespace backend.DAL
         }
 
 
-
         // ----------------- Check if venue is available for requested date and hours -----------------
         public async Task<bool> IsVenueAvailableAsync(int venueId, DateTime date, int hours)
         {

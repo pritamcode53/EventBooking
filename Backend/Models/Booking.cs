@@ -16,6 +16,7 @@ namespace backend.Models
         public decimal TotalPrice { get; set; }
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public bool IsPaid { get; set; } = false;
 
         // Navigation properties
         public Venue? Venue { get; set; }

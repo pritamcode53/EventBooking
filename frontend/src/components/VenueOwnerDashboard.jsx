@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { PlusCircle, Trash2, Edit3, Image as ImageIcon, DollarSign } from "lucide-react";
 import {
   VENUE_BOOKINGS,
   UPDATE_BOOKING_STATUS,
@@ -20,22 +21,25 @@ const VenueOwnerDashboard = () => {
   const [approved, setApproved] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const [newVenue, setNewVenue] = useState({
+  const [modalType, setModalType] = useState(null); // "add" | "edit" | "pricing"
+  const [selectedVenue, setSelectedVenue] = useState(null);
+
+  const [venueForm, setVenueForm] = useState({
     name: "",
     location: "",
     capacity: "",
     description: "",
   });
-  const [editVenue, setEditVenue] = useState(null);
-  const [pricingVenueId, setPricingVenueId] = useState(null);
+
   const [pricingData, setPricingData] = useState([
     { type: 0, price: "" },
     { type: 1, price: "" },
     { type: 2, price: "" },
   ]);
+
   const [selectedFiles, setSelectedFiles] = useState([]);
 
-  // ------------------- Fetch Venues -------------------
+  // ------------------- Fetch Data -------------------
   const fetchVenues = async () => {
     try {
       setLoading(true);
@@ -49,7 +53,6 @@ const VenueOwnerDashboard = () => {
     }
   };
 
-  // ------------------- Fetch Bookings -------------------
   const fetchBookings = async () => {
     try {
       const res = await axios.get(VENUE_BOOKINGS, { withCredentials: true });
@@ -60,7 +63,6 @@ const VenueOwnerDashboard = () => {
     }
   };
 
-  // ------------------- Fetch Approved Bookings -------------------
   const fetchApprovedBookings = async () => {
     try {
       const res = await axios.get(APPROVED_VENUE, { withCredentials: true });
@@ -78,34 +80,23 @@ const VenueOwnerDashboard = () => {
   }, []);
 
   // ------------------- Venue Operations -------------------
-  const handleAddVenue = async (e) => {
+  const handleAddOrEditVenue = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(ADD_VENUE, newVenue, {
-        withCredentials: true,
-      });
-      alert("Venue added successfully!");
-      setPricingVenueId(res.data.venueId);
-      setNewVenue({ name: "", location: "", capacity: "", description: "" });
+      if (modalType === "add") {
+        const res = await axios.post(ADD_VENUE, venueForm, { withCredentials: true });
+        alert("Venue added successfully!");
+        setSelectedVenue(res.data);
+      } else if (modalType === "edit") {
+        await axios.put(UPDATE_VENUE(selectedVenue.venueId), venueForm, { withCredentials: true });
+        alert("Venue updated successfully!");
+      }
+      setVenueForm({ name: "", location: "", capacity: "", description: "" });
+      setModalType(null);
       fetchVenues();
     } catch (err) {
       console.error(err);
-      alert("Failed to add venue");
-    }
-  };
-
-  const handleUpdateVenue = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.put(UPDATE_VENUE(editVenue.venueId), editVenue, {
-        withCredentials: true,
-      });
-      alert("Venue updated successfully!");
-      setEditVenue(null);
-      fetchVenues();
-    } catch (err) {
-      console.error(err);
-      alert("Failed to update venue");
+      alert("Failed to save venue");
     }
   };
 
@@ -122,8 +113,7 @@ const VenueOwnerDashboard = () => {
   };
 
   const handleUploadImages = async (venueId) => {
-    if (selectedFiles.length === 0)
-      return alert("Please select files to upload");
+    if (selectedFiles.length === 0) return alert("Please select files to upload");
 
     const formData = new FormData();
     selectedFiles.forEach((file) => formData.append("files", file));
@@ -143,14 +133,12 @@ const VenueOwnerDashboard = () => {
 
   const handleAddPricing = async (e) => {
     e.preventDefault();
-    if (!pricingVenueId) return;
-
+    if (!selectedVenue) return;
     try {
-      await axios.post(ADD_VENUE_PRICING(pricingVenueId), pricingData, {
-        withCredentials: true,
-      });
+      await axios.post(ADD_VENUE_PRICING(selectedVenue.venueId), pricingData, { withCredentials: true });
       alert("Pricing added successfully!");
-      setPricingVenueId(null);
+      setModalType(null);
+      setPricingData([{ type: 0, price: "" }, { type: 1, price: "" }, { type: 2, price: "" }]);
       fetchVenues();
     } catch (err) {
       console.error(err);
@@ -175,280 +163,186 @@ const VenueOwnerDashboard = () => {
     }
   };
 
+  // ------------------- Modal -------------------
+  const openAddModal = () => {
+    setModalType("add");
+    setVenueForm({ name: "", location: "", capacity: "", description: "" });
+    setSelectedVenue(null);
+  };
+
+  const openEditModal = (venue) => {
+    setModalType("edit");
+    setSelectedVenue(venue);
+    setVenueForm({ name: venue.name, location: venue.location, capacity: venue.capacity, description: venue.description });
+  };
+
+  const openPricingModal = (venue) => {
+    setModalType("pricing");
+    setSelectedVenue(venue);
+  };
+
+  const closeModal = () => {
+    setModalType(null);
+    setSelectedVenue(null);
+    setSelectedFiles([]);
+  };
+
   return (
-    <div className="p-6 space-y-10">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">
-        Venue Owner Dashboard
-      </h1>
+    <div className="min-h-screen bg-gray-50 pt-16 sm:pt-20 lg:pt-24 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
 
-      {/* Add Venue Form */}
-      {!pricingVenueId && !editVenue && (
-        <form
-          onSubmit={handleAddVenue}
-          className="bg-white p-6 shadow-md rounded-lg max-w-lg space-y-4"
-        >
-          <h2 className="text-xl font-semibold">Add New Venue</h2>
-          <input
-            type="text"
-            placeholder="Name"
-            value={newVenue.name}
-            onChange={(e) => setNewVenue({ ...newVenue, name: e.target.value })}
-            className="w-full border p-2 rounded"
-            required
-          />
-          <input
-            type="text"
-            placeholder="Location"
-            value={newVenue.location}
-            onChange={(e) =>
-              setNewVenue({ ...newVenue, location: e.target.value })
-            }
-            className="w-full border p-2 rounded"
-            required
-          />
-          <input
-            type="number"
-            placeholder="Capacity"
-            value={newVenue.capacity}
-            onChange={(e) =>
-              setNewVenue({ ...newVenue, capacity: e.target.value })
-            }
-            className="w-full border p-2 rounded"
-            required
-          />
-          <textarea
-            placeholder="Description"
-            value={newVenue.description}
-            onChange={(e) =>
-              setNewVenue({ ...newVenue, description: e.target.value })
-            }
-            className="w-full border p-2 rounded"
-            required
-          />
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+          <h1 className="text-3xl font-bold text-gray-800">Venue Owner Dashboard</h1>
           <button
-            type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            onClick={openAddModal}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
-            Add Venue
+            <PlusCircle className="w-5 h-5" /> Add Venue
           </button>
-        </form>
-      )}
+        </div>
 
-      {/* Edit Venue Form */}
-      {editVenue && (
-        <form
-          onSubmit={handleUpdateVenue}
-          className="bg-white p-6 shadow-md rounded-lg max-w-lg space-y-4"
-        >
-          <h2 className="text-xl font-semibold">Edit Venue</h2>
-          <input
-            type="text"
-            value={editVenue.name}
-            onChange={(e) =>
-              setEditVenue({ ...editVenue, name: e.target.value })
-            }
-            className="w-full border p-2 rounded"
-          />
-          <input
-            type="text"
-            value={editVenue.location}
-            onChange={(e) =>
-              setEditVenue({ ...editVenue, location: e.target.value })
-            }
-            className="w-full border p-2 rounded"
-          />
-          <input
-            type="number"
-            value={editVenue.capacity}
-            onChange={(e) =>
-              setEditVenue({ ...editVenue, capacity: e.target.value })
-            }
-            className="w-full border p-2 rounded"
-          />
-          <textarea
-            value={editVenue.description}
-            onChange={(e) =>
-              setEditVenue({ ...editVenue, description: e.target.value })
-            }
-            className="w-full border p-2 rounded"
-          />
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-            >
-              Update
-            </button>
-            <button
-              onClick={() => setEditVenue(null)}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
+        {/* Venues */}
+        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {venues.map((v) => (
+            <div key={v.venueId} className="w-full bg-white rounded-lg shadow p-4 flex flex-col gap-2 overflow-hidden">
+              <h3 className="font-semibold text-lg">{v.name}</h3>
+              <p>{v.location}</p>
+              <p>Capacity: {v.capacity}</p>
+              <p className="text-gray-600">{v.description}</p>
 
-      {/* Add Pricing Form */}
-      {pricingVenueId && (
-        <form
-          onSubmit={handleAddPricing}
-          className="bg-white p-6 shadow-md rounded-lg max-w-lg space-y-4"
-        >
-          <h2 className="text-xl font-semibold">
-            Add Pricing for Venue ID: {pricingVenueId}
-          </h2>
-          {pricingData.map((p, index) => (
-            <div key={index} className="flex gap-2 items-center">
-              <label className="w-1/3">
-                {p.type === 0
-                  ? "Per Hour"
-                  : p.type === 1
-                  ? "Per Day"
-                  : "Per Event"}
-              </label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <button onClick={() => openEditModal(v)} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 flex items-center gap-1">
+                  <Edit3 className="w-4 h-4" /> Edit
+                </button>
+                <button onClick={() => handleDeleteVenue(v.venueId)} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 flex items-center gap-1">
+                  <Trash2 className="w-4 h-4" /> Delete
+                </button>
+                <button onClick={() => openPricingModal(v)} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 flex items-center gap-1">
+                  <DollarSign className="w-4 h-4" /> Pricing
+                </button>
+                <button onClick={() => handleUploadImages(v.venueId)} className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 flex items-center gap-1">
+                  <ImageIcon className="w-4 h-4" /> Upload
+                </button>
+              </div>
+
               <input
-                type="number"
-                value={p.price}
-                onChange={(e) => {
-                  const newData = [...pricingData];
-                  newData[index].price = e.target.value;
-                  setPricingData(newData);
-                }}
-                placeholder="Enter price"
-                className="border p-2 rounded w-2/3"
-                required
+                type="file"
+                multiple
+                onChange={(e) => setSelectedFiles([...e.target.files])}
+                className="mt-2 border border-gray-300 rounded-lg p-2 cursor-pointer bg-white hover:border-blue-500 transition focus:outline-none focus:ring-2 focus:ring-blue-300 w-full"
               />
             </div>
           ))}
-          <button
-            type="submit"
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          >
-            Save Pricing
-          </button>
-        </form>
-      )}
+        </div>
 
-      {/* Venues List */}
-      <div>
-        <h2 className="text-2xl font-semibold mb-3">Your Venues</h2>
-        {loading ? (
-          <p>Loading...</p>
-        ) : venues.length === 0 ? (
-          <p>No venues found.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {venues.map((v) => (
-              <div
-                key={v.venueId}
-                className="bg-white p-4 shadow rounded space-y-2"
-              >
-                <h3 className="font-semibold text-lg">{v.name}</h3>
-                <p>{v.location}</p>
-                <p>Capacity: {v.capacity}</p>
-                <p className="text-gray-600">{v.description}</p>
+        {/* Booking Requests */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Booking Requests</h2>
+          {bookings.length === 0 ? (
+            <p className="text-gray-500 text-center">No booking requests found.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {bookings.map((b) => (
+                <div key={b.bookingId} className="w-full bg-white rounded-lg shadow p-4 flex flex-col gap-2">
+                  <h3 className="font-semibold text-lg">{b.venue.name}</h3>
+                  <p>Date: {new Date(b.bookingDate).toLocaleString()}</p>
+                  <p>Customer: {b.customer.name}</p>
+                  <p>Status: {b.status}</p>
+                  {b.status === "Pending" && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <button
+                        onClick={() => updateBookingStatus(b.bookingId, "Approved")}
+                        className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 flex items-center gap-1"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => updateBookingStatus(b.bookingId, "Rejected")}
+                        className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 flex items-center gap-1"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-                {/* Image Upload */}
-                <input
-                  type="file"
-                  multiple
-                  onChange={(e) => setSelectedFiles([...e.target.files])}
-                  className="mt-2"
-                />
-                <button
-                  onClick={() => handleUploadImages(v.venueId)}
-                  className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 mt-1"
+        {/* Upcoming Booked Events */}
+        <div>
+          <h2 className="text-2xl font-bold mb-6 text-gray-800">Upcoming Booked Events</h2>
+          {approved.length === 0 ? (
+            <p className="text-gray-500 text-center">No upcoming bookings found.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {approved.map((b) => (
+                <div
+                  key={b.bookingId}
+                  className="backdrop-blur-sm bg-white/70 border border-gray-200 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 p-5 flex flex-col gap-3"
                 >
-                  Upload Images
-                </button>
-
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => setEditVenue(v)}
-                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteVenue(v.venueId)}
-                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Pending Booking Requests */}
-      <div>
-        <h2 className="text-2xl font-semibold mb-3">Booking Requests</h2>
-        {bookings.length === 0 ? (
-          <p>No bookings found.</p>
-        ) : (
-          <div className="space-y-4">
-            {bookings.map((b) => (
-              <div
-                key={b.bookingId}
-                className="bg-white p-4 shadow rounded flex justify-between items-center"
-              >
-                <div>
-                  <h3 className="font-semibold">{b.venue.name}</h3>
-                  <p>Date: {new Date(b.bookingDate).toLocaleString()}</p>
-                  <p>Customer: {b.customer.name}</p>
-                  <p>Status: {b.status}</p>
-                </div>
-                {b.status === "Pending" && (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() =>
-                        updateBookingStatus(b.bookingId, "Approved")
-                      }
-                      className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                  <h3 className="font-bold text-lg text-gray-800">{b.venue.name}</h3>
+                  <p className="text-gray-600">📅 Date: {new Date(b.bookingDate).toLocaleString()}</p>
+                  <p className="text-gray-600">👤 Customer: {b.customer.name}</p>
+                  <p className="text-gray-700">
+                    Status:{" "}
+                    <span
+                      className={`px-2 py-1 rounded-full text-sm font-semibold ${
+                        b.status === "Approved"
+                          ? "bg-green-100 text-green-800"
+                          : b.status === "Pending"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
                     >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() =>
-                        updateBookingStatus(b.bookingId, "Rejected")
-                      }
-                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                    >
-                      Reject
-                    </button>
+                      {b.status}
+                    </span>
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Modal */}
+        {modalType && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-start p-4 overflow-auto z-50">
+            <div className="bg-white rounded-2xl shadow-lg p-6 max-w-md w-full">
+              {modalType === "add" || modalType === "edit" ? (
+                <form onSubmit={handleAddOrEditVenue} className="space-y-3">
+                  <h2 className="text-xl font-semibold">{modalType === "add" ? "Add New Venue" : "Edit Venue"}</h2>
+                  <input type="text" placeholder="Name" value={venueForm.name} onChange={(e) => setVenueForm({...venueForm, name: e.target.value})} className="w-full border p-2 rounded" required/>
+                  <input type="text" placeholder="Location" value={venueForm.location} onChange={(e) => setVenueForm({...venueForm, location: e.target.value})} className="w-full border p-2 rounded" required/>
+                  <input type="number" placeholder="Capacity" value={venueForm.capacity} onChange={(e) => setVenueForm({...venueForm, capacity: e.target.value})} className="w-full border p-2 rounded" required/>
+                  <textarea placeholder="Description" value={venueForm.description} onChange={(e) => setVenueForm({...venueForm, description: e.target.value})} className="w-full border p-2 rounded" required/>
+
+                  <div className="flex justify-end gap-2 flex-wrap">
+                    <button type="button" onClick={closeModal} className="px-4 py-2 rounded border hover:bg-gray-100">Cancel</button>
+                    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Approved Bookings */}
-      <div>
-        <h2 className="text-2xl font-semibold mb-3">
-          Approved Bookings (Upcoming)
-        </h2>
-        {approved.length === 0 ? (
-          <p>No approved bookings found.</p>
-        ) : (
-          <div className="space-y-4">
-            {approved.map((b) => (
-              <div
-                key={b.bookingId}
-                className="bg-white p-4 shadow rounded flex justify-between items-center"
-              >
-                <div>
-                  <h3 className="font-semibold">{b.venue.name}</h3>
-                  <p>Date: {new Date(b.bookingDate).toLocaleString()}</p>
-                  <p>Customer: {b.customer.name}</p>
-                  <p>Status: {b.status}</p>
-                </div>
-              </div>
-            ))}
+                </form>
+              ) : modalType === "pricing" ? (
+                <form onSubmit={handleAddPricing} className="space-y-3">
+                  <h2 className="text-xl font-semibold">Add Pricing for {selectedVenue?.name}</h2>
+                  {pricingData.map((p, i) => (
+                    <div key={i} className="flex flex-col sm:flex-row gap-2 items-center">
+                      <label className="w-full sm:w-1/3">{p.type === 0 ? "Per Hour" : p.type === 1 ? "Per Day" : "Per Event"}</label>
+                      <input type="number" placeholder="Enter price" value={p.price} onChange={(e) => {
+                        const newData = [...pricingData];
+                        newData[i].price = e.target.value;
+                        setPricingData(newData);
+                      }} className="border p-2 rounded w-full sm:w-2/3" required/>
+                    </div>
+                  ))}
+                  <div className="flex justify-end gap-2 flex-wrap">
+                    <button type="button" onClick={closeModal} className="px-4 py-2 rounded border hover:bg-gray-100">Cancel</button>
+                    <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Save Pricing</button>
+                  </div>
+                </form>
+              ) : null}
+            </div>
           </div>
         )}
       </div>

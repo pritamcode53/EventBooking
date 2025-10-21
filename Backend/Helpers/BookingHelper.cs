@@ -12,13 +12,14 @@ namespace backend.Helpers
         private readonly VenueDAL _venueDAL;
         private readonly MailService _mailService;
         private readonly UserDAL _userDAL; // Add UserDAL to fetch owner/customer info
-
-        public BookingHelper(BookingDAL dal, VenueDAL venueDAL, MailService mailService, UserDAL userDAL)
+        private readonly PaymentDAL _paymentDAL;
+        public BookingHelper(BookingDAL dal, VenueDAL venueDAL, MailService mailService, UserDAL userDAL , PaymentDAL paymentDAL)
         {
             _dal = dal;
             _venueDAL = venueDAL;
             _mailService = mailService;
             _userDAL = userDAL;
+            _paymentDAL = paymentDAL;
         }
 
         // ----------------- Create Booking -----------------
@@ -114,6 +115,8 @@ namespace backend.Helpers
                         };
                     }
                 }
+                var payment = await _paymentDAL.GetPaymentByBookingIdAsync(booking.BookingId);
+                booking.IsPaid = payment != null && payment.Status == "Success";
             }
 
             return bookings;
