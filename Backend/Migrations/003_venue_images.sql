@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS venue_images (
+    venueimageid SERIAL PRIMARY KEY,
+    venueid INT NOT NULL REFERENCES venues(venueid) ON DELETE CASCADE,
+    imageurl TEXT NOT NULL,
+    createdat TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

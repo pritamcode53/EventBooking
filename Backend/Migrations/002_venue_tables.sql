@@ -1,0 +1,10 @@
+CREATE TABLE  IF NOT EXISTS venues(
+    venueid SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    capacity INT NOT NULL,
+    description TEXT,
+    ownerid INT NOT NULL REFERENCES users(userid),
+    createdat TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedat TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

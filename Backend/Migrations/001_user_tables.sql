@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS users (
+    userid SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    passwordhash VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL CHECK (role IN ('Admin', 'VenueOwner', 'Customer')),
+    createdat TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedat TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
