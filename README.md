@@ -209,7 +209,7 @@ CREATE TABLE IF NOT EXISTS payments (
 );
 ```
 
- ## UI Screenshots
+ ## UI Mockups
 
 
 ![Home](assets/homepage.png)
