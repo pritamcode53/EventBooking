@@ -118,6 +118,13 @@ This platform bridges the gap between venue providers and customers, offering an
 | PUT    | /api/bookings/{bookingId}/status | Update booking status (Approved/Rejected) |
 | DELETE | /api/bookings/{bookingId} | Cancel a booking |
 
+
+### Payment APIs
+| Method | Endpoint                      | Description                          |
+|--------|-------------------------------|--------------------------------------|
+| POST   | /api/payment/create           | Create a payment for a booking       |
+
+
 ### Review APIs
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -201,6 +208,24 @@ CREATE TABLE IF NOT EXISTS payments (
     createdat TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 ```
+
+## UI Screenshots
+
+### Homepage
+!Homepage
+
+### Booking Modal
+!Booking
+
+### Admin Dashboard
+!Admindb
+
+### Details Venue 
+!Details
+
+
+
+
 
 ## Tech Stack
 
