@@ -210,10 +210,10 @@ CREATE TABLE IF NOT EXISTS payments (
 ```
 
  ## UI Mockups
-
-
 ![Home](assets/homepage.png)
 
+### Flowchart 
+![Flowchart](assets/flowchart.png)
 <!-- ### Booking Modal
 ![Booking Modal](assets/booking.png)
 
