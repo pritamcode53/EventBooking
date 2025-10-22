@@ -209,12 +209,12 @@ CREATE TABLE IF NOT EXISTS payments (
 );
 ```
 
-<!-- ## UI Screenshots
+ ## UI Screenshots
 
 ### Homepage
 ![Home](assets/homepage.png)
 
-### Booking Modal
+<!-- ### Booking Modal
 ![Booking Modal](assets/booking.png)
 
 ### Admin Dashboard
