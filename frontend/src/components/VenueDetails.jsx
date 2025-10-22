@@ -49,24 +49,55 @@ const VenueDetails = ({ venue, onClose }) => {
 
         {/* Reviews */}
         {venue.reviews && venue.reviews.length > 0 && (
-          <div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-3 text-center">
+          <div className="mb-6">
+            <h3 className="text-xl font-semibold text-gray-700 mb-4 text-center">
               Reviews
             </h3>
-            <div className="space-y-3">
-              {venue.reviews.map((review) => (
-                <div
-                  key={review.reviewId}
-                  className="p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition"
-                >
-                  <p className="font-semibold text-gray-800">{review.reviewerName}</p>
-                  <p className="text-yellow-500 font-semibold">
-                    {"★".repeat(review.rating)}{" "}
-                    {"☆".repeat(5 - review.rating)}
-                  </p>
-                  <p className="text-gray-600">{review.comment}</p>
-                </div>
-              ))}
+            <div className="space-y-4">
+              {venue.reviews.map((review) => {
+                // Debug: check if images exist
+                console.log("Review Images:", review.ImagePath);
+
+                return (
+                  <div
+                    key={review.reviewId}
+                    className="p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition bg-gray-50"
+                  >
+                    <div className="flex items-center mb-2">
+                      {review.reviewerImage && (
+                        <img
+                          src={`${IMAGE_BASE_URL}${review.reviewerImage}`}
+                          alt={review.reviewerName}
+                          className="w-10 h-10 rounded-full mr-3 object-cover"
+                        />
+                      )}
+                      <div>
+                        <p className="font-semibold text-gray-800">{review.reviewerName}</p>
+                        <p className="flex text-yellow-500">
+                          {"★".repeat(review.rating)}
+                          {"☆".repeat(5 - review.rating)}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-gray-700 mb-2">{review.comment}</p>
+
+                    {/* Review Images */}
+                    {review.ImageUrl && review.ImageUrl.length > 0 && (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-2">
+                        {(Array.isArray(review.ImageUrl) ? review.ImageUrl : [review.ImageUrl]).map((img, idx) => (
+                          <img
+                            key={idx}
+                            src={`${IMAGE_BASE_URL}${img}`}
+                            alt={`Review ${idx}`}
+                            className="w-full h-20 object-cover rounded-lg shadow-sm"
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

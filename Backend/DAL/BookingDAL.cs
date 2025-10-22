@@ -100,36 +100,65 @@ namespace backend.DAL
             return bookings;
         }
         public async Task<IEnumerable<Booking>> GetApprovedBookingsByOwnerAsync(int ownerId)
-        {
-            var sql = @"
-        SELECT b.*,
-               u.userid, u.name, u.email, u.role, u.createdat, u.updatedat,
-               v.venueid, v.name, v.location, v.capacity, v.description, v.ownerid, v.createdat, v.updatedat
-        FROM bookings b
-        JOIN venues v ON b.venueid = v.venueid
-        JOIN users u ON b.customerid = u.userid
-        WHERE v.ownerid = @OwnerId
-          AND b.status = 'Approved'
-        ORDER BY b.bookingdate ASC
+{
+    var sql = @"
+        SELECT 
+    b.bookingid,
+    b.venueid AS BookingVenueId,
+    b.customerid,
+    b.bookingdate,
+    b.timeduration AS TimeDuration,      -- enum mapping
+    b.duration_hours AS DurationHours,
+    b.duration_days AS DurationDays,
+    b.totalprice,
+    b.status,
+    b.createdat,
+    b.ispaid,
+
+    u.userid,
+    u.name,
+    u.email,
+    u.role,
+    u.createdat AS user_createdat,
+    u.updatedat AS user_updatedat,
+
+    v.venueid AS Venue_VenueId,
+    v.name,
+    v.location,
+    v.capacity,
+    v.description,
+    v.ownerid,
+    v.createdat AS venue_createdat,
+    v.updatedat AS venue_updatedat
+FROM bookings b
+JOIN venues v ON b.venueid = v.venueid
+JOIN users u ON b.customerid = u.userid
+WHERE v.ownerid = @OwnerId
+  AND b.status = @Status
+ORDER BY b.bookingdate ASC;
     ";
 
-            if (_db.State != ConnectionState.Open)
-                _db.Open();
+    if (_db.State != ConnectionState.Open)
+        _db.Open();
 
-            var bookings = await _db.QueryAsync<Booking, User, Venue, Booking>(
-                sql,
-                (b, user, venue) =>
-                {
-                    b.Customer = user;
-                    b.Venue = venue;
-                    return b;
-                },
-                new { OwnerId = ownerId },
-                splitOn: "userid,venueid"
-            );
+    var bookings = await _db.QueryAsync<Booking, User, Venue, Booking>(
+        sql,
+        (b, user, venue) =>
+        {
+            b.Customer = user;
+            b.Venue = venue;
+            return b;
+        },
+        new 
+        { 
+            OwnerId = ownerId,                 // pass as int, not string
+            Status = BookingStatus.Approved.ToString() // int for enum
+        },
+        splitOn: "userid,Venue_VenueId"       // matches your SELECT aliases
+    );
 
-            return bookings;
-        }
+    return bookings;
+}
 
 
         // ----------------- Check if venue is available for requested date and hours -----------------

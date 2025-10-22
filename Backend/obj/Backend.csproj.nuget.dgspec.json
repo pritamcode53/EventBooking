@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\EventBooking\\Backend\\Backend.csproj": {}
+    "D:\\EventBooking\\backend\\Backend.csproj": {}
   },
   "projects": {
-    "D:\\EventBooking\\Backend\\Backend.csproj": {
+    "D:\\EventBooking\\backend\\Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\EventBooking\\Backend\\Backend.csproj",
+        "projectUniqueName": "D:\\EventBooking\\backend\\Backend.csproj",
         "projectName": "Backend",
-        "projectPath": "D:\\EventBooking\\Backend\\Backend.csproj",
+        "projectPath": "D:\\EventBooking\\backend\\Backend.csproj",
         "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
-        "outputPath": "D:\\EventBooking\\Backend\\obj\\",
+        "outputPath": "D:\\EventBooking\\backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\HP\\AppData\\Roaming\\NuGet\\NuGet.Config"

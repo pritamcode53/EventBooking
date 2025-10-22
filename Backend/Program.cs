@@ -74,13 +74,20 @@ builder.Services.AddScoped<HomeDAL>();
 builder.Services.AddScoped<HomeHelper>();
 // Paymet 
 builder.Services.AddScoped<PaymentDAL>();
-
 // Register PaymentHelper
 builder.Services.AddScoped<PaymentHelper>(sp =>
 {
     var paymentDAL = sp.GetRequiredService<PaymentDAL>();
     return new PaymentHelper(paymentDAL);
 });
+//Admin
+builder.Services.AddScoped<AdminDAL>();
+builder.Services.AddScoped<AdminHelper>(sp =>
+{
+    var adminDAL = sp.GetRequiredService<AdminDAL>();
+    return new AdminHelper(adminDAL);
+});
+
 
 // ---------------------- JWT Service ----------------------
 builder.Services.AddSingleton<JwtService>();
