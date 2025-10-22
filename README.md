@@ -54,6 +54,22 @@ This platform bridges the gap between venue providers and customers, offering an
 5. **Event Execution & Review**: Users attend the event, and post-event reviews can be submitted.
 6. **Admin Oversight**: Admins monitor all activities, generate reports, and ensure smooth operations.
 
+
+
+## Time Estimation
+
+| Module               | Estimated Time | Expected Date |
+|----------------------|----------------|----------------|
+| Project Documentation| 2 days         | 2025-10-15     |
+| User Authentication  | 2 days         | 2025-10-17     |
+| Venue Management     | 3 days         | 2025-10-19     |
+| Booking System       | 3 days         | 2025-10-22     |
+| Review System        | 2 days         | 2025-10-25     |
+| Admin Dashboard      | 2 days         | 2025-10-27     |
+| API Integration      | 3 days         | 2025-10-29     |
+| **Total**            | **17 days**    | -              |
+
+
 ## API Design
 ### User APIs
 | Method | Endpoint | Description |
