@@ -211,7 +211,7 @@ CREATE TABLE IF NOT EXISTS payments (
 
  ## UI Screenshots
 
-### Homepage
+
 ![Home](assets/homepage.png)
 
 <!-- ### Booking Modal
