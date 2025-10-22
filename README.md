@@ -214,20 +214,91 @@ CREATE TABLE IF NOT EXISTS payments (
 
 ### Flowchart 
 ![Flowchart](assets/flowchart.png)
-<!-- ### Booking Modal
-![Booking Modal](assets/booking.png)
 
-### Admin Dashboard
-![Admin Dashboard](assets/admindb.png)
+### Table Relationships
 
-### Venue Details
-![Venue Details](assets/details.png)
 
-### User Dashboard
-![User Dashboard](assets/userdb.png)
+```mermaid
+erDiagram
+    USERS {
+        int userid PK
+        varchar name
+        varchar email
+        varchar passwordhash
+        varchar role
+        timestamp createdat
+        timestamp updatedat
+    }
 
-### Venue Owner Dashboard
-![Venue Owner Dashboard](assets/venueownerdb.png) -->
+    VENUES {
+        int venueid PK
+        varchar name
+        varchar location
+        int capacity
+        text description
+        int ownerid FK
+        timestamp createdat
+        timestamp updatedat
+    }
+
+    VENUE_IMAGES {
+        int venueimageid PK
+        int venueid FK
+        text imageurl
+        timestamp createdat
+    }
+
+    VENUE_PRICINGS {
+        int venuepricingid PK
+        int venueid FK
+        varchar type
+        numeric price
+        timestamp createdat
+    }
+
+    BOOKINGS {
+        int bookingid PK
+        int venueid FK
+        int customerid FK
+        timestamp bookingdate
+        int timeduration
+        numeric totalprice
+        varchar status
+        timestamp createdat
+    }
+
+    VENUE_REVIEWS {
+        int reviewid PK
+        int venueid FK
+        int userid FK
+        int rating
+        text comment
+        text imagepath
+        timestamp createdat
+    }
+
+    PAYMENTS {
+        int paymentid PK
+        int bookingid FK
+        int venueid FK
+        numeric amount
+        varchar paymentmethod
+        varchar status
+        timestamp createdat
+    }
+
+    USERS ||--o{ VENUES : owns
+    USERS ||--o{ BOOKINGS : makes
+    USERS ||--o{ VENUE_REVIEWS : writes
+    VENUES ||--o{ VENUE_IMAGES : has
+    VENUES ||--o{ VENUE_PRICINGS : has
+    VENUES ||--o{ BOOKINGS : booked_at
+    VENUES ||--o{ VENUE_REVIEWS : reviewed_by
+    BOOKINGS ||--o{ PAYMENTS : paid_with
+    VENUES ||--o{ PAYMENTS : receives
+
+
+```
 
 
 
