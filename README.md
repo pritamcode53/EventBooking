@@ -56,19 +56,20 @@ This platform bridges the gap between venue providers and customers, offering an
 
 
 
+
 ## Time Estimation
 
-| Module               | Estimated Time | Expected Date |
-|----------------------|----------------|----------------|
-| Project Documentation| 2 days         | 2025-10-15     |
-| User Authentication  | 2 days         | 2025-10-17     |
-| Venue Management     | 3 days         | 2025-10-19     |
-| Booking System       | 3 days         | 2025-10-22     |
-| Review System        | 2 days         | 2025-10-25     |
-| Admin Dashboard      | 2 days         | 2025-10-27     |
-| API Integration      | 3 days         | 2025-10-29     |
-| **Total**            | **17 days**    | -              |
-
+| Module                     | Estimated Time | Expected Date |
+|----------------------------|----------------|----------------|
+| Project Documentation      | 2 days         | 2025-10-15     |
+| User Authentication        | 2 days         | 2025-10-17     |
+| Venue Management           | 3 days         | 2025-10-19     |
+| Booking System             | 3 days         | 2025-10-22     |
+| Review System              | 2 days         | 2025-10-25     |
+| Admin Dashboard            | 2 days         | 2025-10-27     |
+| API Integration            | 3 days         | 2025-10-29     |
+| Final Review & Refactoring | 6 days         | 2025-11-01     |
+| **Total**                  | **23 days**    | -              |
 
 ## API Design
 ### User APIs
@@ -178,6 +179,16 @@ CREATE TABLE IF NOT EXISTS payments (
     createdat TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 ```
+
+## Tech Stack
+
+| Layer       | Technology        | Description                          |
+|-------------|-------------------|--------------------------------------|
+| Frontend    | React.js          | JavaScript library for building UI   |
+|             | Tailwind CSS      | Utility-first CSS framework          |
+| Backend     | .NET 8            | Backend framework for APIs & logic   |
+| Database    | PostgreSQL        | Relational database for data storage |
+
 
 ## Conclusion
 This Event and Venue Management & Booking System will provide a robust, scalable, and user-friendly platform that caters to all stakeholders—customers, venue owners, and administrators. By centralizing venue management and booking operations, it will save time, reduce operational complexity, and enhance customer satisfaction.
