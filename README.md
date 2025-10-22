@@ -95,14 +95,20 @@ This platform bridges the gap between venue providers and customers, offering an
 | POST   | /api/users/login | Authenticate a user |
 | GET    | /api/users/profile | Retrieve user profile |
 
+
 ### Venue APIs
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET    | /api/venues | List all venues with optional filters |
-| GET    | /api/venues/{id} | Get details of a specific venue |
-| POST   | /api/venue/create | Add a new venue (Owner/Admin) |
-| PUT    | /api/venue/update/{id} | Update venue details |
-| DELETE | /api/venue/delete/{id} | Delete a venue |
+
+| Method | Endpoint                                | Description                          |
+|--------|-----------------------------------------|--------------------------------------|
+| GET    | /api/venues                             | List all venues with optional filters |
+| GET    | /api/venues/{id}                        | Get details of a specific venue       |
+| POST   | /api/venue/create                       | Add a new venue (Owner/Admin)        |
+| PUT    | /api/venue/update/{id}                  | Update venue details                 |
+| DELETE | /api/venue/delete/{id}                  | Delete a venue                       |
+| POST   | /api/venues/{venueId}/images            | Upload venue images                  |
+| POST   | /api/venues/{venueId}/pricing           | Add venue pricing for listing        |
+| PUT    | /api/venues/{venueId}/pricing/{pricingId} | Update venue pricing    
+
 
 ### Booking APIs
 | Method | Endpoint | Description |
