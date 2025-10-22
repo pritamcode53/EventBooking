@@ -212,10 +212,10 @@ CREATE TABLE IF NOT EXISTS payments (
 ## UI Screenshots
 
 ### Homepage
-!Homepage
+![Home](assets/homepage.png)
 
 ### Booking Modal
-!Booking
+![Booking Modal](assets/booking.png)
 
 ### Admin Dashboard
 ![Admin Dashboard](assets/admindb.png)
@@ -223,11 +223,11 @@ CREATE TABLE IF NOT EXISTS payments (
 ### Venue Details
 ![Venue Details](assets/details.png)
 
-### User Database
-!User Database
+### User Dashboard
+![User Dashboard](assets/userdb.png)
 
-### Venue Owner Database
-!Venue Owner Database
+### Venue Owner Dashboard
+![Venue Owner Dashboard](assets/venueownerdb.png)
 
 
 
