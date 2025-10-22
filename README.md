@@ -1,10 +1,6 @@
 
 # Event and Venue Management & Booking System
 
-## Project Summary
-The Event and Venue Management & Booking System is a comprehensive platform designed to streamline the management, booking, and administration of venues and events. It enables venue owners, event organizers, and customers to efficiently handle the entire event lifecycle, from listing and booking venues to managing payments, schedules, and reviews. The system facilitates real-time availability checks, secure booking, and provides reviews for better decision-making.
-
-This platform bridges the gap between venue providers and customers, offering an intuitive and reliable digital solution that enhances operational efficiency and improves the overall user experience.
 
 ## Introduction
 
@@ -21,6 +17,10 @@ The **Event and Venue Management & Booking System** is a full-stack web applicat
 - Role-based access for **Customers**, **Venue Owners**, and **Admins**.
 - Real-time booking management, review system, and admin analytics dashboard.
 
+## Project Summary
+The Event and Venue Management & Booking System is a comprehensive platform designed to streamline the management, booking, and administration of venues and events. It enables venue owners, event organizers, and customers to efficiently handle the entire event lifecycle, from listing and booking venues to managing payments, schedules, and reviews. The system facilitates real-time availability checks, secure booking, and provides reviews for better decision-making.
+
+This platform bridges the gap between venue providers and customers, offering an intuitive and reliable digital solution that enhances operational efficiency and improves the overall user experience.
 
 ## Project Scope
 - Centralized platform for venue listing and booking
