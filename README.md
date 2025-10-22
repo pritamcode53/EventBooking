@@ -209,7 +209,7 @@ CREATE TABLE IF NOT EXISTS payments (
 );
 ```
 
-## UI Screenshots
+<!-- ## UI Screenshots
 
 ### Homepage
 ![Home](assets/homepage.png)
@@ -227,7 +227,7 @@ CREATE TABLE IF NOT EXISTS payments (
 ![User Dashboard](assets/userdb.png)
 
 ### Venue Owner Dashboard
-![Venue Owner Dashboard](assets/venueownerdb.png)
+![Venue Owner Dashboard](assets/venueownerdb.png) -->
 
 
 
