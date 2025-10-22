@@ -93,5 +93,75 @@ This platform bridges the gap between venue providers and customers, offering an
 | GET    | /api/admin/bookings | List all bookings |
 | GET    | /api/admin/reports | Generate system-wide reports |
 
+## Schemas
+```sql
+CREATE TABLE IF NOT EXISTS users (
+    userid SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    passwordhash VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL CHECK (role IN ('Admin', 'VenueOwner', 'Customer')),
+    createdat TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedat TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS venues(
+    venueid SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    capacity INT NOT NULL,
+    description TEXT,
+    ownerid INT NOT NULL REFERENCES users(userid),
+    createdat TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedat TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS venue_images (
+    venueimageid SERIAL PRIMARY KEY,
+    venueid INT NOT NULL REFERENCES venues(venueid) ON DELETE CASCADE,
+    imageurl TEXT NOT NULL,
+    createdat TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS venue_pricings (
+    venuepricingid SERIAL PRIMARY KEY,
+    venueid INT NOT NULL REFERENCES venues(venueid) ON DELETE CASCADE,
+    type VARCHAR(50) NOT NULL,
+    price NUMERIC(12, 2) NOT NULL,
+    createdat TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS bookings (
+    bookingid SERIAL PRIMARY KEY,
+    venueid INT NOT NULL REFERENCES venues(venueid) ON DELETE CASCADE,
+    customerid INT NOT NULL REFERENCES users(userid) ON DELETE CASCADE,
+    bookingdate TIMESTAMP NOT NULL,
+    timeduration INT NOT NULL,
+    totalprice NUMERIC(10,2) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    createdat TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS venue_reviews (
+    reviewid SERIAL PRIMARY KEY,
+    venueid INT NOT NULL REFERENCES venues(venueid) ON DELETE CASCADE,
+    userid INT NOT NULL REFERENCES users(userid) ON DELETE CASCADE,
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT,
+    imagepath TEXT,
+    createdat TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+    paymentid SERIAL PRIMARY KEY,
+    bookingid INT NOT NULL REFERENCES bookings(bookingid) ON DELETE CASCADE,
+    venueid INT NOT NULL REFERENCES venues(venueid) ON DELETE CASCADE,
+    amount NUMERIC(12,2) NOT NULL,
+    paymentmethod VARCHAR(50),
+    status VARCHAR(50) NOT NULL,
+    createdat TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+```
+
 ## Conclusion
 This Event and Venue Management & Booking System will provide a robust, scalable, and user-friendly platform that caters to all stakeholders—customers, venue owners, and administrators. By centralizing venue management and booking operations, it will save time, reduce operational complexity, and enhance customer satisfaction.
