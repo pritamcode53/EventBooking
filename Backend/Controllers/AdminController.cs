@@ -1,54 +1,80 @@
 using backend.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Common.Enums;
+using System;
+using System.Threading.Tasks;
 
 namespace backend.Controllers
 {
     [ApiController]
     [Route("api/admin")]
-    // [Authorize(Roles = "Admin")]  // Only admin users can access
+    [Authorize] // Require authentication for all routes
     public class AdminController : ControllerBase
     {
-        private readonly AdminHelper _helper;
+        private readonly AdminHelper _adminHelper;
+        private readonly UserHelper _userHelper;
 
-        public AdminController(AdminHelper helper)
+        public AdminController(AdminHelper adminHelper, UserHelper userHelper)
         {
-            _helper = helper;
+            _adminHelper = adminHelper;
+            _userHelper = userHelper;
         }
 
-        // GET: api/admin/owners
+        // ---------------- Helper Functions ----------------
+
+        private int? GetUserIdFromToken()
+        {
+            if (!Request.Cookies.TryGetValue("jwtToken", out var token))
+                return null;
+
+            return _userHelper.ValidateToken(token);
+        }
+
+        private async Task<int> GetAuthenticatedAdminIdAsync()
+        {
+            var userId = GetUserIdFromToken();
+            if (userId == null)
+                throw new UnauthorizedAccessException("User not authenticated");
+
+            var user = await _userHelper.GetUserByIdAsync(userId.Value);
+            if (user == null || user.Role != UserRole.Admin)
+                throw new UnauthorizedAccessException("Only admins can perform this action");
+
+            return userId.Value;
+        }
+
+        // ---------------- Admin Endpoints ----------------
+
         [HttpGet("owners")]
         public async Task<IActionResult> GetOwners()
         {
-            var owners = await _helper.GetAllOwnersAsync();
+            await GetAuthenticatedAdminIdAsync(); // ✅ Verify admin via token
+
+            var owners = await _adminHelper.GetAllOwnersAsync();
             return Ok(owners);
         }
 
-        // GET: api/admin/venues
         [HttpGet("venues")]
         public async Task<IActionResult> GetVenues()
         {
-            var venues = await _helper.GetAllVenuesAsync();
+            await GetAuthenticatedAdminIdAsync(); // ✅ Verify admin via token
+
+            var venues = await _adminHelper.GetAllVenuesAsync();
             return Ok(venues);
         }
 
-        // GET: api/admin/bookings
         [HttpGet("bookings")]
         public async Task<IActionResult> GetBookings([FromQuery] string? status = null)
         {
-            IEnumerable<object> bookings;
+            await GetAuthenticatedAdminIdAsync(); // ✅ Verify admin via token
 
-            if (!string.IsNullOrEmpty(status))
-            {
-                bookings = await _helper.GetBookingsByStatusAsync(status);
-            }
-            else
-            {
-                bookings = await _helper.GetAllBookingsAsync();
-            }
+            var bookings = string.IsNullOrEmpty(status)
+                ? await _adminHelper.GetAllBookingsAsync()
+                : await _adminHelper.GetBookingsByStatusAsync(status);
 
-            var totalCost = await _helper.GetTotalBookingCostAsync();
-            var totalBookings = await _helper.GetTotalBookingsCountAsync();
+            var totalCost = await _adminHelper.GetTotalBookingCostAsync();
+            var totalBookings = await _adminHelper.GetTotalBookingsCountAsync();
 
             return Ok(new
             {
@@ -58,13 +84,37 @@ namespace backend.Controllers
             });
         }
 
-        // GET: api/admin/bookings/{id}
-        [HttpGet("bookings/{id}")]
+        [HttpGet("bookings/{id:int}")]
         public async Task<IActionResult> GetBookingById(int id)
         {
-            var booking = await _helper.GetBookingByIdAsync(id);
-            if (booking == null) return NotFound();
+            await GetAuthenticatedAdminIdAsync(); // ✅ Verify admin via token
+
+            var booking = await _adminHelper.GetBookingByIdAsync(id);
+            if (booking == null)
+                return NotFound(new { Message = "Booking not found" });
+
             return Ok(booking);
+        }
+        // GET: api/admin/analytics/total-cost
+        [HttpGet("analytics/total-cost")]
+        public async Task<IActionResult> GetTotalBookingCost()
+        {
+            // Verify admin
+            await GetAuthenticatedAdminIdAsync();
+
+            var totalCost = await _adminHelper.GetTotalBookingCostAsync();
+            return Ok(new { TotalCost = totalCost });
+        }
+
+        // GET: api/admin/analytics/total-bookings
+        [HttpGet("analytics/total-bookings")]
+        public async Task<IActionResult> GetTotalBookingsCount()
+        {
+            // Verify admin
+            await GetAuthenticatedAdminIdAsync();
+
+            var totalBookings = await _adminHelper.GetTotalBookingsCountAsync();
+            return Ok(new { TotalBookings = totalBookings });
         }
     }
 }

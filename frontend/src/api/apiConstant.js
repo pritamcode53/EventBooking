@@ -28,3 +28,16 @@ export const UPLOAD_VENUE_IMAGES = (venueId) =>
   `${BASE_URL}/venue/${venueId}/images`;
 
 export const APPROVED_VENUE = `${BASE_URL}/booking/owner/bookings/approved`;
+
+// =============================
+// 👑 ADMIN API ENDPOINTS
+// =============================
+export const ADMIN_BASE = `${BASE_URL}/admin`;
+
+export const ADMIN_GET_OWNERS = `${ADMIN_BASE}/owners`;
+export const ADMIN_GET_VENUES = `${ADMIN_BASE}/venues`;
+export const ADMIN_GET_BOOKINGS = `${ADMIN_BASE}/bookings`;
+export const ADMIN_GET_BOOKING_BY_ID = (id) => `${ADMIN_BASE}/bookings/${id}`;
+// Admin Analytics Endpoints
+export const ADMIN_TOTAL_BOOKINGS = `${ADMIN_BASE}/analytics/total-bookings`;
+export const ADMIN_TOTAL_COST = `${ADMIN_BASE}/analytics/total-cost`;

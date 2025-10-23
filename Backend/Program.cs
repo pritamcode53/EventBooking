@@ -58,7 +58,7 @@ builder.Services.AddScoped<BookingHelper>(sp =>
     var paymentDAL = sp.GetRequiredService<PaymentDAL>();
     var mailService = sp.GetRequiredService<MailService>(); // inject MailService
     var userDAL = sp.GetRequiredService<UserDAL>();         // inject UserDAL for fetching owner/customer info
-    return new BookingHelper(bookingDAL, venueDAL, mailService, userDAL,paymentDAL);
+    return new BookingHelper(bookingDAL, venueDAL, mailService, userDAL, paymentDAL);
 });
 // Review
 builder.Services.AddScoped<ReviewDAL>();
