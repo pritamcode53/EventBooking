@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import VenueCard from "./VenueCard";
 import { GET_ALL_VENUES } from "../api/apiConstant";
 import { Filter, X } from "lucide-react";
@@ -10,7 +11,7 @@ const Home = () => {
   const [error, setError] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [locationOptions, setLocationOptions] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Auth state
+  const navigate = useNavigate();
 
   const [selectedFilters, setSelectedFilters] = useState({
     Type: [],
@@ -19,7 +20,6 @@ const Home = () => {
     Capacity: [],
   });
 
-  // Fetch venues with optional filters
   const fetchVenues = async (filters = {}) => {
     try {
       setLoading(true);
@@ -50,7 +50,6 @@ const Home = () => {
     }
   };
 
-  // Fetch locations dynamically
   useEffect(() => {
     const fetchLocations = async () => {
       try {
@@ -86,28 +85,39 @@ const Home = () => {
     fetchVenues();
   };
 
+  // First row count logic
+  const getFirstRowCount = () => {
+    if (window.innerWidth >= 1280) return 4; // xl
+    if (window.innerWidth >= 1024) return 3; // lg
+    if (window.innerWidth >= 768) return 2;  // md
+    return 1;                                // sm
+  };
+
+  const firstRowCount = getFirstRowCount();
+  const displayedVenues = venues.slice(0, firstRowCount);
+
   return (
-   <div className="pt-24 px-6 pb-10 bg-gray-50 min-h-screen">
-      {/* Header + Filter Toggle + Auth Buttons */}
+    <div className="pt-24 px-6 pb-10 bg-gray-50 min-h-screen">
+      {/* Header + Filter Toggle */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
-  <h1 className="text-3xl font-bold text-gray-800">Explore Venues</h1>
-  <button
-  onClick={() => setIsFilterOpen(!isFilterOpen)}
-  className="flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition font-semibold shadow-md w-full sm:w-auto"
->
-  {isFilterOpen ? (
-    <>
-      <X className="w-5 h-5" />
-      <span>Hide Filters</span>
-    </>
-  ) : (
-    <>
-      <Filter className="w-5 h-5" />
-      <span>Filters</span>
-    </>
-  )}
-</button>
-</div>
+        <h1 className="text-3xl font-bold text-gray-800">Explore Venues</h1>
+        <button
+          onClick={() => setIsFilterOpen(!isFilterOpen)}
+          className="flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition font-semibold shadow-md w-full sm:w-auto"
+        >
+          {isFilterOpen ? (
+            <>
+              <X className="w-5 h-5" />
+              <span>Hide Filters</span>
+            </>
+          ) : (
+            <>
+              <Filter className="w-5 h-5" />
+              <span>Filters</span>
+            </>
+          )}
+        </button>
+      </div>
 
       {/* Filter Panel */}
       {isFilterOpen && (
@@ -115,40 +125,33 @@ const Home = () => {
           {/* Type */}
           <div>
             <h3 className="font-semibold mb-2">Type</h3>
-            {[
-              { label: "Per Hour", value: "0" },
-              { label: "Per Day", value: "1" },
-              { label: "Per Event", value: "2" },
-            ].map(type => (
-              <label key={type.value} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selectedFilters.Type.includes(type.value)}
-                  onChange={() => handleCheckboxChange("Type", type.value)}
-                />
-                {type.label}
-              </label>
-            ))}
+            {[{ label: "Per Hour", value: "0" }, { label: "Per Day", value: "1" }, { label: "Per Event", value: "2" }]
+              .map(type => (
+                <label key={type.value} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedFilters.Type.includes(type.value)}
+                    onChange={() => handleCheckboxChange("Type", type.value)}
+                  />
+                  {type.label}
+                </label>
+              ))}
           </div>
 
           {/* Price */}
           <div>
             <h3 className="font-semibold mb-2">Price</h3>
-            {[
-              { label: "0 - 500", value: "0-500" },
-              { label: "501 - 1000", value: "501-1000" },
-              { label: "1001 - 5000", value: "1001-5000" },
-              { label: "5000+", value: "5001-100000" },
-            ].map(range => (
-              <label key={range.value} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selectedFilters.PriceRange.includes(range.value)}
-                  onChange={() => handleCheckboxChange("PriceRange", range.value)}
-                />
-                {range.label}
-              </label>
-            ))}
+            {[{ label: "0 - 500", value: "0-500" }, { label: "501 - 1000", value: "501-1000" }, { label: "1001 - 5000", value: "1001-5000" }, { label: "5000+", value: "5001-100000" }]
+              .map(range => (
+                <label key={range.value} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedFilters.PriceRange.includes(range.value)}
+                    onChange={() => handleCheckboxChange("PriceRange", range.value)}
+                  />
+                  {range.label}
+                </label>
+              ))}
           </div>
 
           {/* Location */}
@@ -183,16 +186,10 @@ const Home = () => {
 
           {/* Apply / Reset */}
           <div className="col-span-full flex gap-2 mt-4">
-            <button
-              onClick={applyFilters}
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-            >
+            <button onClick={applyFilters} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
               Apply
             </button>
-            <button
-              onClick={resetFilters}
-              className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
-            >
+            <button onClick={resetFilters} className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
               Reset
             </button>
           </div>
@@ -201,16 +198,30 @@ const Home = () => {
 
       {/* Venues Grid */}
       {loading ? (
-  <div className="text-center">Loading venues...</div>
-) : venues.length > 0 ? (
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-    {venues.map((venue) => (
-      <VenueCard key={venue.venueId} venue={venue} />
-    ))}
-  </div>
-) : (
-  <div className="text-center text-gray-500">No venues available</div>
-)}
+        <div className="text-center">Loading venues...</div>
+      ) : venues.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {displayedVenues.map(venue => (
+              <VenueCard key={venue.venueId} venue={venue} />
+            ))}
+          </div>
+
+          {/* Explore More Button */}
+          {venues.length > firstRowCount && (
+            <div className="flex justify-center mt-6">
+              <button
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-semibold"
+                onClick={() => navigate("/venues")} // Navigate to /venues page
+              >
+                Explore More
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="text-center text-gray-500">No venues available</div>
+      )}
     </div>
   );
 };

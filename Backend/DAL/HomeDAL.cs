@@ -55,7 +55,17 @@ namespace backend.DAL
                     ORDER BY r.createdat DESC
                 ", new { venue.VenueId });
                 venue.Reviews = reviews.AsList();
+
+                foreach (var review in reviews)
+                {
+                    var reviewImages = await _db.QueryAsync<string>(
+                        "SELECT imagepath FROM venue_reviews WHERE reviewid = @ReviewId",
+                        new { review.ReviewId });
+                    review.Images = reviewImages.AsList();
+                }
+
             }
+            
 
             return venues;
         }

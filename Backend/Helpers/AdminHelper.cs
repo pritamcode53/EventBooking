@@ -27,16 +27,18 @@ namespace backend.Helpers
         }
 
         // Fetch all bookings
-        public async Task<IEnumerable<BookingDto>> GetAllBookingsAsync()
+        public async Task<(IEnumerable<BookingDto> Bookings, int TotalCount)> GetAllBookingsAsync(int pageNumber, int pageSize)
         {
-            return await _dal.GetAllBookingsAsync();
+            return await _dal.GetAllBookingsAsync(pageNumber, pageSize);
         }
 
         // Fetch bookings filtered by status (optional)
-        public async Task<IEnumerable<BookingDto>> GetBookingsByStatusAsync(string status)
-        {
-            return await _dal.GetBookingsByStatusAsync(status);
-        }
+        public async Task<(IEnumerable<BookingDto> Bookings, int TotalCount)> GetBookingsByStatusAsync(
+    string status, int pageNumber = 1, int pageSize = 10)
+    {
+        return await _dal.GetBookingsByStatusAsync(status, pageNumber, pageSize);
+    }
+
 
         // Fetch approved bookings by owner
         public async Task<IEnumerable<BookingDto>> GetApprovedBookingsByOwnerAsync(int ownerId)
@@ -55,6 +57,11 @@ namespace backend.Helpers
         {
             return await _dal.GetTotalBookingCostAsync();
         }
+        //Get Total cancel bookings
+        public async Task<decimal> GetTotalCancelBookingAsync()
+        {
+            return await _dal.GetTotalCancel();
+        }
 
         // Fetch total bookings count
         public async Task<int> GetTotalBookingsCountAsync()
@@ -66,6 +73,11 @@ namespace backend.Helpers
         public async Task<BookingDto?> GetBookingByIdAsync(int bookingId)
         {
             return await _dal.GetBookingByIdAsync(bookingId);
+        }
+        //Get all cancel bookings 
+        public async Task<IEnumerable<CancelledBookingDto>> GetAllCancelBooking()
+        {
+            return await _dal.GetAllCancelAsync();
         }
     }
 }

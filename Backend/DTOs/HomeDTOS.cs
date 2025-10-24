@@ -29,5 +29,6 @@ namespace backend.DTOs
         public int Rating { get; set; }
         public string Comment { get; set; } = string.Empty;
         public string ReviewerName { get; set; } = string.Empty;
+         public List<string> Images { get; set; } = new List<string>();
     }
 }

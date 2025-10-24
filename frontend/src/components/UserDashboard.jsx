@@ -9,6 +9,11 @@ const UserDashboard = () => {
   const [hoverRating, setHoverRating] = useState(0);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [cancelData, setCancelData] = useState({
+    bookingId: null,
+    reason: "",
+  });
 
   const [reviewData, setReviewData] = useState({
     venueId: null,
@@ -36,15 +41,9 @@ const UserDashboard = () => {
     }
   };
 
-  const handleCancelBooking = async (bookingId) => {
-    try {
-      await axios.post(CANCEL_BOOKING(bookingId), {}, { withCredentials: true });
-      alert("Booking cancelled successfully!");
-      fetchBookings();
-    } catch (error) {
-      console.error(error);
-      alert("Error cancelling booking");
-    }
+  const handleCancelBooking = (bookingId) => {
+    setCancelData({ bookingId, reason: "" });
+    setIsCancelModalOpen(true);
   };
 
   const openReviewModal = (venueId) => {
@@ -109,6 +108,28 @@ const submitReview = async (e) => {
       console.error(error);
       alert("Error submitting review");
     }
+  }
+};
+  const submitCancelBooking = async (e) => {
+  e.preventDefault();
+
+  if (!cancelData.reason.trim()) {
+    alert("Please provide a cancellation reason");
+    return;
+  }
+
+  try {
+    await axios.post(
+      CANCEL_BOOKING(cancelData.bookingId),
+      { cancelReason: cancelData.reason },
+      { withCredentials: true }
+    );
+    alert("Booking cancelled successfully!");
+    setIsCancelModalOpen(false);
+    fetchBookings();
+  } catch (error) {
+    console.error(error);
+    alert("Error cancelling booking");
   }
 };
 
@@ -236,7 +257,7 @@ const submitReview = async (e) => {
       )}
 
       {/* Modals */}
-      {(isReviewModalOpen || isPaymentModalOpen) && (
+      {(isReviewModalOpen || isPaymentModalOpen || isCancelModalOpen) && (
         <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl w-96">
             {isReviewModalOpen && (
@@ -304,7 +325,47 @@ const submitReview = async (e) => {
                 </div>
               </form>
             )}
+            {isCancelModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-xl shadow-xl w-96 animate-fadeIn relative">
+      <h2 className="text-2xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
+        <XCircle className="text-red-500" />
+        Cancel Booking
+      </h2>
 
+      <form onSubmit={submitCancelBooking}>
+        <label className="block mb-2 text-gray-700 font-medium">
+          Reason for cancellation:
+        </label>
+        <textarea
+          rows={4}
+          value={cancelData.reason}
+          onChange={(e) =>
+            setCancelData((prev) => ({ ...prev, reason: e.target.value }))
+          }
+          placeholder="e.g., Change in plans, found another venue, etc."
+          className="w-full border border-gray-300 rounded-lg p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-red-400"
+        />
+
+        <div className="flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => setIsCancelModalOpen(false)}
+            className="px-4 py-2 rounded border hover:bg-gray-100"
+          >
+            Close
+          </button>
+          <button
+            type="submit"
+            className="px-5 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition"
+          >
+            Confirm Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
             {isPaymentModalOpen && (
               <form onSubmit={submitPayment}>
                 <h2 className="text-2xl font-semibold mb-4 text-gray-800">Make Payment</h2>

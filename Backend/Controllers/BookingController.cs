@@ -66,14 +66,20 @@ namespace backend.Controllers
 
         [Authorize]
         [HttpPost("{bookingId}/cancel")]
-        public async Task<IActionResult> CancelBooking(int bookingId)
+        public async Task<IActionResult> CancelBooking(int bookingId, [FromBody] CancelBookingRequest request)
         {
             var userId = GetUserIdFromToken();
-            if (userId == null) return Unauthorized();
+            if (userId == null)
+                return Unauthorized();
 
-            await _helper.CancelBookingAsync(bookingId, userId.Value);
-            return Ok("Booking cancelled successfully");
+            if (string.IsNullOrWhiteSpace(request.CancelReason))
+                return BadRequest("Cancellation reason is required.");
+
+            await _helper.CancelBookingAsync(bookingId, userId.Value, request.CancelReason);
+
+            return Ok(new { message = "Booking cancelled successfully" });
         }
+
 
         [Authorize]
         [HttpGet("mybookings")]

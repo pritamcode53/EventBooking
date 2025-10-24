@@ -37,7 +37,10 @@ export const ADMIN_BASE = `${BASE_URL}/admin`;
 export const ADMIN_GET_OWNERS = `${ADMIN_BASE}/owners`;
 export const ADMIN_GET_VENUES = `${ADMIN_BASE}/venues`;
 export const ADMIN_GET_BOOKINGS = `${ADMIN_BASE}/bookings`;
+// export const ADMIN_GET_CANCEL = `${ADMIN_BASE}/cancel`;
 export const ADMIN_GET_BOOKING_BY_ID = (id) => `${ADMIN_BASE}/bookings/${id}`;
 // Admin Analytics Endpoints
 export const ADMIN_TOTAL_BOOKINGS = `${ADMIN_BASE}/analytics/total-bookings`;
 export const ADMIN_TOTAL_COST = `${ADMIN_BASE}/analytics/total-cost`;
+export const ADMIN_GET_CANCEL = `${ADMIN_BASE}/analytics/cancel`;
+export const ADMIN_GET_CANCEL_DETAILS = `${ADMIN_BASE}/details-cancel`;

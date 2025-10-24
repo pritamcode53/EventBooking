@@ -89,9 +89,9 @@ namespace backend.Helpers
         }
 
         // ----------------- Cancel Booking -----------------
-        public async Task<int> CancelBookingAsync(int bookingId, int customerId)
+        public async Task<int> CancelBookingAsync(int bookingId, int customerId ,  string cancelReason)
         {
-            return await _dal.DeleteBookingAsync(bookingId, customerId);
+            return await _dal.CancelBookingAsync(bookingId, customerId , cancelReason);
         }
 
         // ----------------- Get Customer Bookings -----------------
