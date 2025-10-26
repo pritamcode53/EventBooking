@@ -95,7 +95,7 @@ namespace backend.DAL
         {
             const string sql = "SELECT * FROM venue_pricings WHERE venueid = @VenueId AND type = @Type LIMIT 1";
 
-            if (_db.State != ConnectionState.Open) 
+            if (_db.State != ConnectionState.Open)
                 _db.Open();
 
             return await _db.QueryFirstOrDefaultAsync<VenuePricing>(sql, new
@@ -113,19 +113,39 @@ namespace backend.DAL
             if (_db.State != ConnectionState.Open) _db.Open();
             return (await _db.QueryAsync<VenuePricing>(sql, new { Id = venuePricingId })).FirstOrDefault();
         }
+        // ---------------- Venue Id + Type for updating the price ----------------
+        public async Task<VenuePricing?> GetVenuePricingByVenueAndTypeAsync(int venueId, PricingType type)
+        {
+            const string sql = @"
+        SELECT venuepricingid, venueid, type, price, createdat, updatedat
+        FROM venue_pricings
+        WHERE venueid = @VenueId
+          AND type = @Type
+        LIMIT 3;
+    ";
+
+            if (_db.State != ConnectionState.Open)
+                _db.Open();
+
+            return await _db.QueryFirstOrDefaultAsync<VenuePricing>(sql, new
+            {
+                VenueId = venueId,
+                Type = (int)type  // store enum as integer
+            });
+        }
+
 
         // ----------------- Update Pricing -----------------
         public async Task<int> UpdateVenuePricingAsync(VenuePricing pricing)
         {
             const string sql = @"
                 UPDATE venue_pricings
-                SET type = @Type, price = @Price, updatedat = @UpdatedAt
+                SET price = @Price, updatedat = @UpdatedAt
                 WHERE venuepricingid = @VenuePricingId
             ";
             if (_db.State != ConnectionState.Open) _db.Open();
             return await _db.ExecuteAsync(sql, new
             {
-                Type = (int)pricing.Type,
                 pricing.Price,
                 pricing.UpdatedAt,
                 pricing.VenuePricingId

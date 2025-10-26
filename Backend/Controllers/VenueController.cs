@@ -92,16 +92,36 @@ namespace backend.Controllers
 
         // ---------------- Update Pricing ----------------
         [Authorize]
-        [HttpPut("{venueId}/pricing/{pricingId}")]
-        public async Task<IActionResult> UpdatePricing(int venueId, int pricingId, [FromBody] VenuePricing dto)
+        [HttpPut("{venueId}/pricing/update")]
+        public async Task<IActionResult> UpdateVenuePricing(int venueId, [FromBody] List<VenuePricingUpdateDto> pricings)
         {
-            int? userId = GetUserIdFromToken();
-            if (userId == null || !await IsVenueOwnerAsync(userId.Value)) return Forbid();
+            if (pricings == null || !pricings.Any())
+                return BadRequest("No pricing data provided");
 
-            var result = await _helper.UpdateVenuePricingAsync(pricingId, dto, userId.Value);
-            if (result == 0) return NotFound("Pricing not found or you are not the owner");
+            int ownerId = await GetAuthenticatedOwnerIdAsync();
+            int successCount = 0;
 
-            return Ok("Pricing updated successfully");
+            foreach (var p in pricings)
+            {
+                // Update by venueId + type
+                var result = await _helper.UpdateVenuePricingAsync(
+                    venueId,      // the venue ID
+                    p.Type,       // PricingType from your DTO
+                    p.Price,      // new price
+                    ownerId       // THIS was missing
+                );
+
+                Console.WriteLine($"Updating VenueId: {venueId}, Type: {p.Type}, Price: {p.Price}");
+
+                if (result > 0)
+                    successCount++;
+            }
+
+            return Ok(new
+            {
+                message = $"{successCount} venue pricing record(s) updated successfully",
+                totalRequested = pricings.Count
+            });
         }
 
         // ---------------- Get Venues by Owner ----------------

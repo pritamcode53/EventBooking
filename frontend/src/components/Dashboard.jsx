@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { USER_PROFILE } from "../api/apiConstant";
 import AdminDashboard from "./AdminDashboard";
-import VenueOwnerDashboard from "./VenueOwnerDashboard";
+import VenueOwnerDashboard from "./VenueOwnerDashboard/VenueOwnerDashboard";
 import UserDashboard from "./UserDashboard";
 
 const Dashboard = () => {

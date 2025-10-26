@@ -168,5 +168,41 @@ namespace backend.Controllers
 
             return Ok("Venue pricing added successfully");
         }
+
+        // [Authorize]
+        // [HttpPut("venue/{venueId}/pricing/update")]
+        // public async Task<IActionResult> UpdateVenuePricing(int venueId, [FromBody] List<VenuePricingUpdateDto> pricings)
+        // {
+        //     if (pricings == null || !pricings.Any())
+        //         return BadRequest("No pricing data provided");
+
+        //     int ownerId = await GetAuthenticatedOwnerIdAsync();
+        //     int successCount = 0;
+
+        //     foreach (var p in pricings)
+        //     {
+        //         // Update by venueId + type
+        //         var result = await _venueHelper.UpdateVenuePricingAsync(
+        //             venueId,      // the venue ID
+        //             p.Type,       // PricingType from your DTO
+        //             p.Price,      // new price
+        //             ownerId       // THIS was missing
+        //         );
+
+        //         Console.WriteLine($"Updating VenueId: {venueId}, Type: {p.Type}, Price: {p.Price}");
+
+        //         if (result > 0)
+        //             successCount++;
+        //     }
+
+        //     return Ok(new
+        //     {
+        //         message = $"{successCount} venue pricing record(s) updated successfully",
+        //         totalRequested = pricings.Count
+        //     });
+        // }
+
+
+
     }
 }

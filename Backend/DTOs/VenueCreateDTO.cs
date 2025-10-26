@@ -20,27 +20,35 @@ namespace backend.DTOs
         public PricingType Type { get; set; }  // "PerHour" or "PerDay"
         public decimal Price { get; set; }
     }
-    
-//     public class VenueFilterDto
-// {
-//     public string? Location { get; set; }
 
-//     // The numeric enum from query string (0 = PerHour, 1 = PerDay, 2 = PerEvent)
-//     public PricingType? Type { get; set; } 
+    public class VenuePricingUpdateDto
+    {
+        public int VenuePricingId { get; set; }
+        public PricingType Type { get; set; }
+        public decimal Price { get; set; }
+    }
 
-//     // Optional: string input from frontend if you want to support names like "PerHour"
-//     public string? TypeString { get; set; } 
 
-//     public decimal? MinPrice { get; set; }
-//     public decimal? MaxPrice { get; set; }
+    //     public class VenueFilterDto
+    // {
+    //     public string? Location { get; set; }
 
-//     // Convenience method to parse TypeString into numeric enum
-//     public void ParseTypeString()
-//     {
-//         if (!string.IsNullOrEmpty(TypeString) && Enum.TryParse(TypeString, true, out PricingType parsed))
-//         {
-//             Type = parsed;
-//         }
-//     }
+    //     // The numeric enum from query string (0 = PerHour, 1 = PerDay, 2 = PerEvent)
+    //     public PricingType? Type { get; set; } 
+
+    //     // Optional: string input from frontend if you want to support names like "PerHour"
+    //     public string? TypeString { get; set; } 
+
+    //     public decimal? MinPrice { get; set; }
+    //     public decimal? MaxPrice { get; set; }
+
+    //     // Convenience method to parse TypeString into numeric enum
+    //     public void ParseTypeString()
+    //     {
+    //         if (!string.IsNullOrEmpty(TypeString) && Enum.TryParse(TypeString, true, out PricingType parsed))
+    //         {
+    //             Type = parsed;
+    //         }
+    //     }
 }
 

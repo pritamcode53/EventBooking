@@ -26,6 +26,11 @@ export const DELETE_VENUE = (deleteId) =>
 export const UPDATE_VENUE = (venueId) => `${BASE_URL}/venue/update/${venueId}`;
 export const UPLOAD_VENUE_IMAGES = (venueId) =>
   `${BASE_URL}/venue/${venueId}/images`;
+export const ADD_VENUE_PRICING = (venueId) =>
+  `${BASE_URL}/booking/admin/venue/${venueId}/pricing/add`;
+
+export const UPDATE_VENUE_PRICING = (venueId) =>
+  `${BASE_URL}/venue/${venueId}/pricing/update`;
 
 export const APPROVED_VENUE = `${BASE_URL}/booking/owner/bookings/approved`;
 

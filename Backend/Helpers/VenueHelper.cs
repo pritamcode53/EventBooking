@@ -1,6 +1,7 @@
 using backend.DAL;
 using backend.Models;
 using backend.DTOs;
+using backend.Common.Enums;
 
 namespace backend.Helpers
 {
@@ -104,25 +105,29 @@ namespace backend.Helpers
         }
 
         // Update venue pricing
-        public async Task<int> UpdateVenuePricingAsync(int venuePricingId, VenuePricing updatedPricing, int ownerId)
+        public async Task<int> UpdateVenuePricingAsync(int venueId, PricingType type, decimal newPrice, int ownerId)
         {
-            var existingPricing = await _dal.GetVenuePricingByIdAsync(venuePricingId);
+            // Get the existing pricing row for this venue and type
+            var existingPricing = await _dal.GetVenuePricingByVenueAndTypeAsync(venueId, type);
             if (existingPricing == null) return 0;
 
-            var venue = await _dal.GetVenueByIdAsync(existingPricing.VenueId);
+            // Check owner
+            var venue = await _dal.GetVenueByIdAsync(venueId);
             if (venue == null || venue.OwnerId != ownerId) return 0;
 
-            existingPricing.Type = updatedPricing.Type;
-            existingPricing.Price = updatedPricing.Price;
+            // Update price and timestamp
+            existingPricing.Price = newPrice;
             existingPricing.UpdatedAt = DateTime.UtcNow;
 
+            // Update the database
             var result = await _dal.UpdateVenuePricingAsync(existingPricing);
 
-            // ✅ Update pending/future bookings dynamically
+            // Update pending/future bookings
             await _dal.UpdateFutureBookingsPricingAsync(existingPricing.VenueId, existingPricing.Type, existingPricing.Price);
 
             return result;
         }
+
 
         public async Task<IEnumerable<Venue>> GetVenuesByOwnerAsync(int ownerId)
         {
