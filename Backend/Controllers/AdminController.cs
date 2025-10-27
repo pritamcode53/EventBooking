@@ -129,6 +129,14 @@ namespace backend.Controllers
             var totalCost = await _adminHelper.GetTotalBookingCostAsync();
             return Ok(new { TotalCost = totalCost });
         }
+         [HttpGet("analytics/total-due")]
+        public async Task<IActionResult> GetTotalDue()
+        {
+            await GetAuthenticatedAdminIdAsync();
+
+            var totalDue = await _adminHelper.GetTotalDueAmount();
+            return Ok(new { TotalDue = totalDue });
+        }
 
         // ✅ Analytics: total bookings count
         [HttpGet("analytics/total-bookings")]

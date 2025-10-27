@@ -70,5 +70,10 @@ namespace backend.Helpers
         {
             return await _reviewDAL.GetReviewsByVenueAsync(venueId);
         }
+        public async Task<IEnumerable<dynamic>> GetAverageRatingByVenueAsync()
+        {
+            return await _reviewDAL.GetAverageRatingByVenueAsync();
+        }
+
     }
 }

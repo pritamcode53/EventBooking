@@ -1,4 +1,5 @@
 using backend.Common.Enums;
+
 namespace backend.DTOs
 {
     public class BookingCreateDto
@@ -19,14 +20,19 @@ namespace backend.DTOs
         public string? CustomerName { get; set; }
 
         public PricingType Type { get; set; }
-
         public int DurationDays { get; set; }
         public int DurationHours { get; set; }
         public decimal TotalPrice { get; set; }
         public DateTime BookingDate { get; set; }
         public BookingStatus Status { get; set; }
+
+        // 🟢 New Fields for Partial Payments
+        public string PaymentStatus { get; set; } = "Unpaid";  // Unpaid | Partial | Paid
+        public decimal PaidAmount { get; set; } = 0.00m;
+        public decimal DueAmount { get; set; } = 0.00m;
+        public VenueDto? Venue { get; set; }
     }
-    
+
     public class CancelBookingRequest
     {
         public string? CancelReason { get; set; }
@@ -45,5 +51,10 @@ namespace backend.DTOs
         public PricingType TimeDuration { get; set; }
         public decimal TotalPrice { get; set; }
         public BookingStatus Status { get; set; }
+
+        // 🟢 Include payment summary for frontend
+        public string PaymentStatus { get; set; } = "Unpaid";
+        public decimal PaidAmount { get; set; } = 0.00m;
+        public decimal DueAmount { get; set; } = 0.00m;
     }
 }

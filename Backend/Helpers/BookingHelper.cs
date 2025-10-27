@@ -23,64 +23,69 @@ namespace backend.Helpers
         }
 
         // ----------------- Create Booking -----------------
-        public async Task<int> CreateBookingAsync(BookingCreateDto dto, int customerId)
-        {
-            var venue = await _venueDAL.GetVenueByIdAsync(dto.VenueId);
-            if (venue == null)
-                throw new Exception("Venue not found");
+      public async Task<int> CreateBookingAsync(BookingCreateDto dto, int customerId)
+{
+    var venue = await _venueDAL.GetVenueByIdAsync(dto.VenueId);
+    if (venue == null)
+        throw new Exception("Venue not found");
 
-            int multiplier = dto.TimeDuration switch
-            {
-                PricingType.PerHour => dto.DurationHours,
-                PricingType.PerDay => dto.DurationDays,
-                PricingType.PerEvent => 1,
-                _ => dto.DurationHours
-            };
+    int multiplier = dto.TimeDuration switch
+    {
+        PricingType.PerHour => dto.DurationHours,
+        PricingType.PerDay => dto.DurationDays,
+        PricingType.PerEvent => 1,
+        _ => dto.DurationHours
+    };
 
-            var available = await _dal.IsVenueAvailableAsync(dto.VenueId, dto.BookingDate, multiplier);
-            if (!available)
-                throw new Exception("Venue not available at this time");
+    var available = await _dal.IsVenueAvailableAsync(dto.VenueId, dto.BookingDate, multiplier);
+    if (!available)
+        throw new Exception("Venue not available at this time");
 
-            var pricing = await _venueDAL.GetVenuePricingAsync(dto.VenueId, dto.TimeDuration);
-            if (pricing == null)
-                throw new Exception($"No pricing found for {dto.TimeDuration}");
+    var pricing = await _venueDAL.GetVenuePricingAsync(dto.VenueId, dto.TimeDuration);
+    if (pricing == null)
+        throw new Exception($"No pricing found for {dto.TimeDuration}");
 
-            decimal totalPrice = dto.TimeDuration switch
-            {
-                PricingType.PerHour => pricing.Price * dto.DurationHours,
-                PricingType.PerDay => pricing.Price * dto.DurationDays,
-                PricingType.PerEvent => pricing.Price,
-                _ => pricing.Price
-            };
+    decimal totalPrice = dto.TimeDuration switch
+    {
+        PricingType.PerHour => pricing.Price * dto.DurationHours,
+        PricingType.PerDay => pricing.Price * dto.DurationDays,
+        PricingType.PerEvent => pricing.Price,
+        _ => pricing.Price
+    };
 
-            var booking = new Booking
-            {
-                VenueId = dto.VenueId,
-                CustomerId = customerId,
-                BookingDate = dto.BookingDate,
-                TimeDuration = dto.TimeDuration,
-                DurationHours = dto.DurationHours,
-                DurationDays = dto.DurationDays,
-                TotalPrice = totalPrice,
-                Status = BookingStatus.Pending,
-                CreatedAt = DateTime.UtcNow
-            };
+    var booking = new Booking
+    {
+        VenueId = dto.VenueId,
+        CustomerId = customerId,
+        BookingDate = dto.BookingDate,
+        TimeDuration = dto.TimeDuration,
+        DurationHours = dto.DurationHours,
+        DurationDays = dto.DurationDays,
+        TotalPrice = totalPrice,
+        Status = BookingStatus.Pending,
+        CreatedAt = DateTime.UtcNow
+    };
 
-            int bookingId = await _dal.AddBookingAsync(booking);
+    // Step 1: Add booking
+    int bookingId = await _dal.AddBookingAsync(booking);
 
-            // ----------------- Email Notification to Venue Owner -----------------
-            var owner = await _userDAL.GetUserByIdAsync(venue.OwnerId); // fetch owner info
-            if (owner != null && !string.IsNullOrEmpty(owner.Email))
-            {
-                string subject = $"New Booking Request for {venue.Name}";
-                string body = $"Hello {owner.Name},\n\n" +
-                              $"A new booking has been made for your venue \"{venue.Name}\" " +
-                              $"on {booking.BookingDate:yyyy-MM-dd HH:mm}. Please review and approve/reject it.";
-                await _mailService.SendEmailAsync(owner.Email, subject, body);
-            }
+    // Step 2: Generate and save Booking Code
+    string bookingCode = $"BKN-{dto.VenueId}{customerId}{bookingId}";
+    await _dal.UpdateBookingCodeAsync(bookingId, bookingCode);
 
-            return bookingId;
-        }
+    // ----------------- Email Notification -----------------
+    var owner = await _userDAL.GetUserByIdAsync(venue.OwnerId);
+    if (owner != null && !string.IsNullOrEmpty(owner.Email))
+    {
+        string subject = $"New Booking Request for {venue.Name}";
+        string body = $"Hello {owner.Name},\n\n" +
+                      $"A new booking (Code: {bookingCode}) has been made for your venue \"{venue.Name}\" " +
+                      $"on {booking.BookingDate:yyyy-MM-dd HH:mm}. Please review and approve/reject it.";
+        await _mailService.SendEmailAsync(owner.Email, subject, body);
+    }
+
+    return bookingId;
+}
 
         // ----------------- Update Booking Status -----------------
         public async Task<int> UpdateBookingStatusAsync(int bookingId, BookingStatus status, int customerId)
@@ -115,8 +120,8 @@ namespace backend.Helpers
                         };
                     }
                 }
-                var payment = await _paymentDAL.GetPaymentByBookingIdAsync(booking.BookingId);
-                booking.IsPaid = payment != null && payment.Status == "Success";
+                var payment = await _paymentDAL.GetPaymentsByBookingIdAsync(booking.BookingId);
+               booking.IsPaid = payment != null && payment.Any(p => p.Status == "Success");
             }
 
             return bookings;

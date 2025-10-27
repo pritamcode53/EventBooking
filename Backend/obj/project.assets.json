@@ -1052,19 +1052,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Pritam Dutta\\.nuget\\packages\\": {}
+    "C:\\Users\\HP\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\csharp\\EventBooking\\Backend\\Backend.csproj",
+      "projectUniqueName": "D:\\EventBooking\\Backend\\Backend.csproj",
       "projectName": "Backend",
-      "projectPath": "D:\\csharp\\EventBooking\\Backend\\Backend.csproj",
-      "packagesPath": "C:\\Users\\Pritam Dutta\\.nuget\\packages\\",
-      "outputPath": "D:\\csharp\\EventBooking\\Backend\\obj\\",
+      "projectPath": "D:\\EventBooking\\Backend\\Backend.csproj",
+      "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
+      "outputPath": "D:\\EventBooking\\Backend\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Pritam Dutta\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\HP\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"

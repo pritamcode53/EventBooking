@@ -52,10 +52,15 @@ namespace backend.Helpers
             return await _dal.GetPendingBookingsByOwnerAsync(ownerId);
         }
 
-        // Fetch total booking cost
+        // Fetch total booking cost -- paid amount 
         public async Task<decimal> GetTotalBookingCostAsync()
         {
             return await _dal.GetTotalBookingCostAsync();
+        }
+        //Fetch all due amount 
+        public async Task<decimal> GetTotalDueAmount()
+        {
+            return await _dal.GetTotalDueAmountAsync();
         }
         //Get Total cancel bookings
         public async Task<decimal> GetTotalCancelBookingAsync()

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { ADMIN_GET_CANCEL, ADMIN_TOTAL_BOOKINGS, ADMIN_TOTAL_COST } from "../api/apiConstant";
+import { ADMIN_GET_CANCEL, ADMIN_TOTAL_BOOKINGS, ADMIN_TOTAL_COST,ADMIN_TOTAL_DUE  } from "../api/apiConstant";
 import { Users, DollarSign, Loader2,XCircle  } from "lucide-react";
 import { Bar, Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from "chart.js";
@@ -11,6 +11,7 @@ const AdminAnalytics = () => {
   const [totalBookings, setTotalBookings] = useState(0);
   const [totalCancel, setTotalCancel] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [totalDue, setTotalDue] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,9 +20,11 @@ const AdminAnalytics = () => {
         const bookingsRes = await axios.get(ADMIN_TOTAL_BOOKINGS, { withCredentials: true });
         const costRes = await axios.get(ADMIN_TOTAL_COST, { withCredentials: true });
         const cancelRes = await axios.get(ADMIN_GET_CANCEL, { withCredentials: true });
+        const costDue = await axios.get(ADMIN_TOTAL_DUE, { withCredentials: true });
 
         setTotalBookings(bookingsRes.data.totalBookings || 0);
         setTotalRevenue(costRes.data.totalCost || 0);
+        setTotalDue(costDue.data.totalDue || 0);
         setTotalCancel(cancelRes.data.totalCancelledBookings || 0);
       } catch (error) {
         console.error("Error fetching analytics:", error);
@@ -68,10 +71,10 @@ const AdminAnalytics = () => {
   const cancellationRate = totalBookings > 0 ? Math.round((totalCancel / totalBookings) * 100) : 0;
 
   const doughnutData = {
-    labels: ["Completed", "Cancelled"],
+    labels: ["Booked - Paid Amount", "Booked Due Amount"],
     datasets: [
       {
-        data: [100 - cancellationRate, cancellationRate],
+        data: [totalRevenue, totalDue],
         backgroundColor: ["#3B82F6", "#EF4444"],
         borderWidth: 1,
       },
@@ -90,7 +93,7 @@ const AdminAnalytics = () => {
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6">
       {/* Summary Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
+   <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mb-6">
         <div className="bg-white rounded-xl shadow p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
           <div className="bg-blue-100 p-3 rounded-full flex-shrink-0">
             <Users className="text-blue-600" size={24} />
@@ -108,6 +111,16 @@ const AdminAnalytics = () => {
           <div>
             <p className="text-gray-500 uppercase text-sm">Total Revenue</p>
             <p className="text-2xl font-bold text-gray-800">₹{totalRevenue.toLocaleString()}</p>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-xl shadow p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div className="bg-green-100 p-3 rounded-full flex-shrink-0">
+            <DollarSign className="text-green-600" size={24} />
+          </div>
+          <div>
+            <p className="text-gray-500 uppercase text-sm">Total Revenue</p>
+            <p className="text-2xl font-bold text-gray-800">₹{totalDue.toLocaleString()}</p>
           </div>
         </div>
 

@@ -4,7 +4,7 @@ import axios from "axios";
 import { USER_PROFILE } from "../api/apiConstant";
 import AdminDashboard from "./AdminDashboard";
 import VenueOwnerDashboard from "./VenueOwnerDashboard/VenueOwnerDashboard";
-import UserDashboard from "./UserDashboard";
+import UserDashboard from "./UserDashboard/UserDashboard";
 
 const Dashboard = () => {
   const [role, setRole] = useState(null);

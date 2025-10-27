@@ -41,5 +41,13 @@ namespace backend.Controllers
             var reviews = await _helper.GetVenueReviewsAsync(venueId);
             return Ok(reviews);
         }
+
+        [HttpGet("average-ratings")]
+        public async Task<IActionResult> GetAverageRatingsForAllVenues()
+        {
+            var averageRatings = await _helper.GetAverageRatingByVenueAsync();
+            return Ok(averageRatings);
+        }
+
     }
 }

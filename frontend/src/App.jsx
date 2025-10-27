@@ -8,6 +8,8 @@ import Home from "./components/Home";
 import AllVenues from "./components/AllVenues";
 import BlogSection from "./components/BlogSection";
 import DashboardHeader from "./components/DashboardHeader";
+import StepsToBook from "./components/StepsToBook";
+import TopRatedVenues from "./components/TopRatedVenues";
 function App() {
   const location = useLocation();
   const isDashboardRoute =
@@ -23,7 +25,10 @@ function App() {
           element={
             <>
               <Home />
-              <BlogSection />
+              {/* <BlogSection /> */}
+              <StepsToBook />
+              <TopRatedVenues/>
+              
             </>
           }
         />

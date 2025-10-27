@@ -56,6 +56,25 @@ namespace backend.DAL
 
             return await _db.QueryAsync<Review>(sql, new { VenueId = venueId });
         }
+        // get the average reviews for the home 
+        public async Task<IEnumerable<dynamic>> GetAverageRatingByVenueAsync()
+{
+    if (_db.State != ConnectionState.Open)
+        _db.Open();
+
+    var sql = @"
+        SELECT 
+            venueid AS VenueId,
+            COALESCE(AVG(rating), 0) AS AverageRating,
+            COUNT(reviewid) AS TotalReviews
+        FROM venue_reviews
+        GROUP BY venueid
+        ORDER BY venueid;
+    ";
+
+    return await _db.QueryAsync(sql);
+}
+
 
         // Check if a user has booked this venue and booking is approved
         public async Task<bool> HasUserBookedVenueAsync(int userId, int venueId)

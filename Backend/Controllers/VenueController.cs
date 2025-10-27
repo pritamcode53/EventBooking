@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 namespace backend.Controllers
 {
     [Route("api/[controller]")]
+    // [Authorize]
     [ApiController]
     public class VenueController : ControllerBase
     {

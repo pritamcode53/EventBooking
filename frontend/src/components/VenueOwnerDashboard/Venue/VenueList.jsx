@@ -99,22 +99,51 @@ const VenueList = () => {
           <p>No venues found.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {venues.map((venue) => (
-            <VenueCard
-              key={venue.venueId}
-              venue={venue}
-              images={venue.venueImages || []}
-              onEdit={() => setEditingVenue(venue)}
-              onDelete={fetchVenues}
-              onUpload={() => setUploadingVenue(venue)}
-              onPrice={() => setPricingVenue(venue)}
-            />
-          ))}
+        <div className="bg-white shadow-md rounded-lg border border-gray-200 overflow-x-auto">
+          {/* ✅ Responsive scrollable table */}
+          <div className="min-w-[700px] md:min-w-full">
+            <table className="w-full text-sm text-gray-700">
+              <thead className="bg-gray-100 text-gray-800">
+                <tr>
+                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[120px]">
+                    Image
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[150px]">
+                    Name
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[150px]">
+                    Location
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[100px]">
+                    Capacity
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[200px]">
+                    Description
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[180px]">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {venues.map((venue) => (
+                  <VenueCard
+                    key={venue.venueId}
+                    venue={venue}
+                    images={venue.venueImages || []}
+                    onEdit={() => setEditingVenue(venue)}
+                    onDelete={fetchVenues}
+                    onUpload={() => setUploadingVenue(venue)}
+                    onPrice={() => setPricingVenue(venue)}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
-      {/* Edit Modal */}
+      {/* Modals */}
       <EditVenueModal
         isOpen={!!editingVenue}
         venueData={editingVenue}
@@ -122,7 +151,6 @@ const VenueList = () => {
         onSave={handleUpdateVenue}
       />
 
-      {/* Upload Images Modal */}
       <UploadImagesModal
         isOpen={!!uploadingVenue}
         venueData={uploadingVenue}
@@ -132,19 +160,16 @@ const VenueList = () => {
         }
       />
 
-      {/* Pricing Modal */}
       <PricingModal
         isOpen={!!pricingVenue}
         currentPricing={pricingVenue?.venuePricings || []}
         onClose={() => setPricingVenue(null)}
         onSave={(pricingData) => {
-          // Convert from modal format to backend array format
           const payload = [
             { type: 0, price: Number(pricingData.perHour) },
             { type: 1, price: Number(pricingData.perDay) },
             { type: 2, price: Number(pricingData.perEvent) },
           ];
-
           handleUpdatePricing(pricingVenue.venueId, payload);
         }}
       />

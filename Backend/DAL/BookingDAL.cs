@@ -41,6 +41,13 @@ namespace backend.DAL
             if (_db.State != ConnectionState.Open) _db.Open();
             return await _db.ExecuteScalarAsync<int>(sql, parameters);
         }
+        //generate booking code and saving it
+        public async Task UpdateBookingCodeAsync(int bookingId, string bookingCode)
+        {
+            var sql = "UPDATE bookings SET bookingcode = @BookingCode WHERE bookingid = @BookingId";
+            await _db.ExecuteAsync(sql, new { BookingCode = bookingCode, BookingId = bookingId });
+        }
+
 
         // ----------------- Update Booking Status -----------------
         public async Task<int> UpdateBookingStatusAsync(int bookingId, BookingStatus status, int customerId)
@@ -149,6 +156,9 @@ namespace backend.DAL
     b.status,
     b.createdat,
     b.ispaid,
+    b.paymentstatus,
+    b.dueamount,
+    b.paidamount,
 
     u.userid,
     u.name,

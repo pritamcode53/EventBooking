@@ -1,4 +1,3 @@
-// PaymentHelper.cs
 using backend.DAL;
 using backend.DTOs;
 
@@ -13,22 +12,43 @@ namespace backend.Helpers
             _paymentDAL = paymentDAL;
         }
 
-        public async Task<PaymentDto> ProcessPaymentAsync(int bookingId, string paymentMethod )
+        /// <summary>
+        /// Processes a payment (partial or full) for a booking.
+        /// </summary>
+        public async Task<PaymentDto> ProcessPaymentAsync(int bookingId, decimal amount, string paymentMethod)
         {
-            // Return PaymentDto directly
-            return await _paymentDAL.CreatePaymentAsync(bookingId, paymentMethod);
+            // Call DAL method for partial payment
+            return await _paymentDAL.CreatePartialPaymentAsync(bookingId, amount, paymentMethod);
         }
 
+        /// <summary>
+        /// Retrieves booking details by booking ID.
+        /// </summary>
         public async Task<BookingDto?> GetBookingAsync(int bookingId)
         {
             return await _paymentDAL.GetBookingByIdAsync(bookingId);
         }
 
-        public async Task<bool> IsBookingBelongsToUser(int bookingId, int userId)
+        /// <summary>
+        /// Verifies that the booking belongs to the specified user.
+        /// </summary>
+      public async Task<bool> IsBookingBelongsToUser(int bookingId, int userId)
         {
             var booking = await GetBookingAsync(bookingId);
-            if (booking == null) return false;
-            return booking.CustomerId == userId;
+            Console.WriteLine($"BookingId: {booking?.BookingId}, CustomerId: {booking?.CustomerId}, VenueOwnerId: {booking?.Venue?.OwnerId}");
+            return booking != null &&
+                (booking.CustomerId == userId || booking.Venue?.OwnerId == userId);
+        }
+
+
+
+        /// <summary>
+        /// Retrieves all payments made for a given booking.
+        /// </summary>
+        public async Task<IEnumerable<PaymentDto>> GetPaymentsByBookingAsync(int bookingId)
+        {
+            return await _paymentDAL.GetPaymentsByBookingIdAsync(bookingId);
+
         }
     }
 }

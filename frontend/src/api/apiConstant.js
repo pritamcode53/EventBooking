@@ -34,6 +34,8 @@ export const UPDATE_VENUE_PRICING = (venueId) =>
 
 export const APPROVED_VENUE = `${BASE_URL}/booking/owner/bookings/approved`;
 
+export const PAYMENT = `${BASE_URL}/payment/create`;
+
 // =============================
 // 👑 ADMIN API ENDPOINTS
 // =============================
@@ -47,5 +49,6 @@ export const ADMIN_GET_BOOKING_BY_ID = (id) => `${ADMIN_BASE}/bookings/${id}`;
 // Admin Analytics Endpoints
 export const ADMIN_TOTAL_BOOKINGS = `${ADMIN_BASE}/analytics/total-bookings`;
 export const ADMIN_TOTAL_COST = `${ADMIN_BASE}/analytics/total-cost`;
+export const ADMIN_TOTAL_DUE = `${ADMIN_BASE}/analytics/total-due`;
 export const ADMIN_GET_CANCEL = `${ADMIN_BASE}/analytics/cancel`;
 export const ADMIN_GET_CANCEL_DETAILS = `${ADMIN_BASE}/details-cancel`;

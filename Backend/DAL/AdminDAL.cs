@@ -149,16 +149,24 @@ namespace backend.DAL
             return await _db.QueryAsync<BookingDto>(sql, new { OwnerId = ownerId });
         }
 
-        // ----------------- Get total booking cost -----------------
+        // ----------------- Get total paid amount cost -----------------
         public async Task<decimal> GetTotalBookingCostAsync()
         {
             if (_db.State != ConnectionState.Open)
                 _db.Open();
 
-            var sql = "SELECT COALESCE(SUM(totalprice), 0) FROM bookings WHERE status = 'Approved';";
+            var sql = "SELECT COALESCE(SUM(paidamount), 0) FROM bookings WHERE status = 'Approved';";
             return await _db.ExecuteScalarAsync<decimal>(sql);
         }
+        // get total due amount 
+        public async Task<decimal> GetTotalDueAmountAsync()
+        {
+            if (_db.State != ConnectionState.Open)
+                _db.Open();
 
+            var sql = "SELECT COALESCE(SUM(dueamount), 0) FROM bookings WHERE status = 'Approved';";
+            return await _db.ExecuteScalarAsync<decimal>(sql);
+        }
         // ----------------- Get total bookings count -----------------
         public async Task<int> GetTotalBookingsCountAsync()
         {
