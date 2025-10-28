@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { ADMIN_GET_VENUES } from "../api/apiConstant";
+import { ADMIN_GET_VENUES } from "../../api/apiConstant";
 import { Loader2, Home } from "lucide-react";
 
 const AdminVenues = () => {

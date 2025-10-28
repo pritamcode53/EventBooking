@@ -85,25 +85,27 @@ const Home = () => {
     fetchVenues();
   };
 
-  // First row count logic
   const getFirstRowCount = () => {
-    if (window.innerWidth >= 1280) return 4; // xl
-    if (window.innerWidth >= 1024) return 3; // lg
-    if (window.innerWidth >= 768) return 2;  // md
-    return 1;                                // sm
+    if (window.innerWidth >= 1280) return 4;
+    if (window.innerWidth >= 1024) return 3;
+    if (window.innerWidth >= 768) return 2;
+    return 1;
   };
 
   const firstRowCount = getFirstRowCount();
   const displayedVenues = venues.slice(0, firstRowCount);
 
   return (
-    <div className="pt-24 px-6 pb-10 bg-gray-50 min-h-screen">
+   <div className="relative pt-24 px-6 pb-10 min-h-screen absolute inset-0 bg-[radial-gradient(circle_at_center,_#d9f99d_0%,_#ffffff_100%)]">
+      {/* 🌿 Radial Gradient Background */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#d9f99d_0%,_#ffffff_100%)] -z-10"></div>
+
       {/* Header + Filter Toggle */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
         <h1 className="text-3xl font-bold text-gray-800">Explore Venues</h1>
         <button
           onClick={() => setIsFilterOpen(!isFilterOpen)}
-          className="flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition font-semibold shadow-md w-full sm:w-auto"
+          className="flex items-center justify-center gap-2 bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition font-semibold shadow-md w-full sm:w-auto"
         >
           {isFilterOpen ? (
             <>
@@ -211,8 +213,8 @@ const Home = () => {
           {venues.length > firstRowCount && (
             <div className="flex justify-center mt-6">
               <button
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-semibold"
-                onClick={() => navigate("/venues")} // Navigate to /venues page
+                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition font-semibold"
+                onClick={() => navigate("/venues")}
               >
                 Explore More
               </button>

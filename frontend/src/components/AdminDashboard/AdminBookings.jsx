@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { ADMIN_GET_BOOKINGS } from "../api/apiConstant";
+import { ADMIN_GET_BOOKINGS } from "../../api/apiConstant";
 import { Loader2, CheckCircle, XCircle, Calendar, User, Home } from "lucide-react";
 
 const AdminBookings = () => {

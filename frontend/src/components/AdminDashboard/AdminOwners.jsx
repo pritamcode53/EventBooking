@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { ADMIN_GET_OWNERS } from "../api/apiConstant";
+import { ADMIN_GET_OWNERS } from "../../api/apiConstant";
 import { Loader2, Users } from "lucide-react";
 
 const AdminOwners = () => {

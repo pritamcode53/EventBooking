@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "AswhWjuhFpbjax77NqzbJSAyzAwQJZkx/sJ14xxZAsQ=",
+  "Hash": "TzaHRaLCF6BXt/BVh41AQC37HRYS7jkealmp41t+7XE=",
   "Source": "Backend",
   "BasePath": "_content/Backend",
   "Mode": "Default",
@@ -283,6 +283,25 @@
       "OriginalItemSpec": "wwwroot\\images\\venues\\7a90f509-c722-4d7e-af3d-ab2fae7c3aa2.jpg"
     },
     {
+      "Identity": "D:\\EventBooking\\Backend\\wwwroot\\images\\venues\\7e51ca8e-7d3a-4613-a2a6-185a18c2f758.jpg",
+      "SourceId": "Backend",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\EventBooking\\Backend\\wwwroot\\",
+      "BasePath": "_content/Backend",
+      "RelativePath": "images/venues/7e51ca8e-7d3a-4613-a2a6-185a18c2f758.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\venues\\7e51ca8e-7d3a-4613-a2a6-185a18c2f758.jpg"
+    },
+    {
       "Identity": "D:\\EventBooking\\Backend\\wwwroot\\images\\venues\\954569f2-f262-496b-a318-e24c07cc76dd.jpg",
       "SourceId": "Backend",
       "SourceType": "Discovered",
@@ -300,6 +319,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\images\\venues\\954569f2-f262-496b-a318-e24c07cc76dd.jpg"
+    },
+    {
+      "Identity": "D:\\EventBooking\\Backend\\wwwroot\\images\\venues\\f6e5b0a3-7147-452b-80ab-38579f463b61.jpg",
+      "SourceId": "Backend",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\EventBooking\\Backend\\wwwroot\\",
+      "BasePath": "_content/Backend",
+      "RelativePath": "images/venues/f6e5b0a3-7147-452b-80ab-38579f463b61.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\venues\\f6e5b0a3-7147-452b-80ab-38579f463b61.jpg"
     }
   ]
 }

@@ -49,5 +49,12 @@ namespace backend.Controllers
             return Ok(averageRatings);
         }
 
+        [HttpGet("top-rated")]
+        public async Task<IActionResult> GetTopRatedVenues()
+        {
+            var result = await _helper.GetTopRatedVenuesAsync();
+            return Ok(result);
+        }
+
     }
 }

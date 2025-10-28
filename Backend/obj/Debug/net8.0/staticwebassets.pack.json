@@ -57,8 +57,16 @@
       "PackagePath": "staticwebassets\\images\\venues\\7a90f509-c722-4d7e-af3d-ab2fae7c3aa2.jpg"
     },
     {
+      "Id": "D:\\EventBooking\\Backend\\wwwroot\\images\\venues\\7e51ca8e-7d3a-4613-a2a6-185a18c2f758.jpg",
+      "PackagePath": "staticwebassets\\images\\venues\\7e51ca8e-7d3a-4613-a2a6-185a18c2f758.jpg"
+    },
+    {
       "Id": "D:\\EventBooking\\Backend\\wwwroot\\images\\venues\\954569f2-f262-496b-a318-e24c07cc76dd.jpg",
       "PackagePath": "staticwebassets\\images\\venues\\954569f2-f262-496b-a318-e24c07cc76dd.jpg"
+    },
+    {
+      "Id": "D:\\EventBooking\\Backend\\wwwroot\\images\\venues\\f6e5b0a3-7147-452b-80ab-38579f463b61.jpg",
+      "PackagePath": "staticwebassets\\images\\venues\\f6e5b0a3-7147-452b-80ab-38579f463b61.jpg"
     },
     {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.Backend.Microsoft.AspNetCore.StaticWebAssets.props",

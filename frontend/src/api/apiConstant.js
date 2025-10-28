@@ -8,14 +8,14 @@ export const USER_PROFILE = `${BASE_URL}/user/profile`;
 
 //Home Page URL
 export const GET_ALL_VENUES = `${BASE_URL}/home/all`;
-
+export const GET_ALL_TOP_RATED_VENUES = `${BASE_URL}/review/top-rated`;
 //cancel booking
 export const CANCEL_BOOKING = (bookingId) =>
   `${BASE_URL}/booking/${bookingId}/cancel`;
 // Booking endpoints
 export const MY_BOOKINGS = `${BASE_URL}/booking/mybookings`;
 
-// Venue Owner / Admin endpoints
+// Venue Owner 
 export const VENUE_BOOKINGS = `${BASE_URL}/booking/owner/bookings/pending`; // Get all pending bookings
 export const UPDATE_BOOKING_STATUS = (bookingId) =>
   `${BASE_URL}/booking/owner/booking/${bookingId}/status`;
@@ -35,6 +35,10 @@ export const UPDATE_VENUE_PRICING = (venueId) =>
 export const APPROVED_VENUE = `${BASE_URL}/booking/owner/bookings/approved`;
 
 export const PAYMENT = `${BASE_URL}/payment/create`;
+
+//Refund section - venue owner 
+export const POST_REFUND_PAYMENT = `${BASE_URL}/refund/process`;
+export const GET_REFUND_CANCELLED_BOOKINGS = `${BASE_URL}/refund/paid-cancelled`;
 
 // =============================
 // 👑 ADMIN API ENDPOINTS

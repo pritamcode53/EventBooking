@@ -1,16 +1,22 @@
-import React from "react";
-import { Trash2, Edit3, DollarSign, Upload } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { MoreVertical, Edit3, Upload, DollarSign, Trash2, MoreHorizontal } from "lucide-react";
 import axios from "axios";
 import { IMAGE_BASE_URL, DELETE_VENUE } from "../../../api/apiConstant";
 
 const VenueCard = ({
   venue,
   images = [],
+  perHour,
+  perDay,
+  perEvent,
   onEdit,
   onUpload,
   onDelete,
   onPrice,
 }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
   const imageUrl = images.length > 0 ? `${IMAGE_BASE_URL}${images[0]}` : null;
 
   const handleDelete = async () => {
@@ -24,6 +30,25 @@ const VenueCard = ({
       console.error("Failed to delete venue:", err);
     }
   };
+
+  const handleAction = (action) => {
+    setIsMenuOpen(false);
+    if (action === "price") onPrice();
+    else if (action === "edit") onEdit();
+    else if (action === "upload") onUpload();
+    else if (action === "delete") handleDelete();
+  };
+
+  // ✅ Close dropdown if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <tr className="border-b hover:bg-gray-50 transition-all duration-200">
@@ -44,50 +69,52 @@ const VenueCard = ({
       <td className="px-4 py-3 font-medium text-gray-900">{venue.name}</td>
       <td className="px-4 py-3 text-gray-700">{venue.location}</td>
       <td className="px-4 py-3 text-gray-700">{venue.capacity}</td>
+      <td className="px-4 py-3 text-gray-700">
+        <ul>
+          <li>Per Hour: {venue.perHour}</li>
+          <li>Per Day: {venue.perDay}</li>
+          <li>Per Event: {venue.perEvent}</li>
+        </ul>
+      </td>
       <td className="px-4 py-3 text-gray-600 max-w-xs">{venue.description}</td>
 
-      <td className="px-4 py-3">
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onPrice();
-            }}
-            className="bg-green-600 text-white px-3 py-1.5 rounded-md hover:bg-green-700 flex items-center gap-1 text-xs transition"
-          >
-            <DollarSign className="w-3 h-3" /> Price
-          </button>
+      {/* ✅ Dropdown menu for actions */}
+      <td className="px-4 py-3 relative" ref={menuRef}>
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1.5 rounded-md flex items-center justify-center transition"
+        >
+          <MoreHorizontal size={18} />
+        </button>
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-            className="bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 flex items-center gap-1 text-xs transition"
-          >
-            <Edit3 className="w-3 h-3" /> Edit
-          </button>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onUpload();
-            }}
-            className="bg-yellow-600 text-white px-3 py-1.5 rounded-md hover:bg-yellow-700 flex items-center gap-1 text-xs transition"
-          >
-            <Upload className="w-3 h-3" /> Upload
-          </button>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDelete();
-            }}
-            className="bg-red-600 text-white px-3 py-1.5 rounded-md hover:bg-red-700 flex items-center gap-1 text-xs transition"
-          >
-            <Trash2 className="w-3 h-3" /> Delete
-          </button>
-        </div>
+        {isMenuOpen && (
+          <div className="absolute right-0 top-10 bg-white border border-gray-200 rounded-lg shadow-lg w-40 z-50">
+            <button
+              onClick={() => handleAction("price")}
+              className="w-full flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm"
+            >
+              <DollarSign size={14} /> Update Pricing
+            </button>
+            <button
+              onClick={() => handleAction("edit")}
+              className="w-full flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm"
+            >
+              <Edit3 size={14} /> Edit Venue
+            </button>
+            <button
+              onClick={() => handleAction("upload")}
+              className="w-full flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm"
+            >
+              <Upload size={14} /> Upload Images
+            </button>
+            <button
+              onClick={() => handleAction("delete")}
+              className="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 text-sm"
+            >
+              <Trash2 size={14} /> Delete Venue
+            </button>
+          </div>
+        )}
       </td>
     </tr>
   );

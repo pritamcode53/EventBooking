@@ -46,21 +46,34 @@ const BookingCard = ({ booking, onCancel, onReview, onPayment }) => {
           </button>
 
           {booking.isPaid ? (
-            <button
-              disabled
-              className="bg-gray-300 cursor-not-allowed text-gray-700 font-medium py-2 rounded-lg transition mb-2"
-            >
-              Paid
-            </button>
-          ) : (
-            <button
-              onClick={onPayment}
-              className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded-lg transition mb-2"
-            >
-              <CreditCard className="w-5 h-5" />
-              Pay Now
-            </button>
-          )}
+  <button
+    disabled
+    className="bg-gray-300 cursor-not-allowed text-gray-700 font-medium py-2 rounded-lg transition mb-2"
+  >
+    Paid
+  </button>
+) : booking.amountPaid > 0 && booking.amountPaid < booking.totalPrice ? (
+  <>
+    <button
+      disabled
+      className="bg-yellow-400 cursor-not-allowed text-white font-medium py-2 rounded-lg transition mb-2 w-full"
+    >
+      Partially Paid (₹{booking.amountPaid})
+    </button>
+    <p className="text-xs text-gray-500 italic text-center mt-1">
+      Next payment should be done from the Owner side. Contact the venue owner.
+    </p>
+  </>
+) : (
+  <button
+    onClick={onPayment}
+    className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded-lg transition mb-2"
+  >
+    <CreditCard className="w-5 h-5" />
+    Pay Now
+  </button>
+)}
+
         </>
       )}
 

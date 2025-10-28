@@ -14,8 +14,11 @@ namespace backend.Models
 
         // Description can be optional (nullable)
         public string? Description { get; set; }
-
+        public string? Images { get; set; }
         public int OwnerId { get; set; }
+        public decimal? PerHour { get; set; }
+        public decimal? PerDay { get; set; }
+        public decimal? PerEvent { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

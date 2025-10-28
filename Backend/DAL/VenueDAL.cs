@@ -153,37 +153,65 @@ namespace backend.DAL
         }
 
         // ----------------- Update Future Bookings Pricing -----------------
-        public async Task<int> UpdateFutureBookingsPricingAsync(int venueId, PricingType type, decimal newPrice)
-        {
-            const string sql = @"
-                UPDATE bookings
-                SET totalprice = @NewPrice * timeduration::int
-                WHERE venueid = @VenueId
-                  AND timeduration::int = @Type
-                  AND bookingdate > NOW()
-                  AND status = 'Pending';
-            ";
-            if (_db.State != ConnectionState.Open) _db.Open();
-            return await _db.ExecuteAsync(sql, new
-            {
-                VenueId = venueId,
-                Type = (int)type,
-                NewPrice = newPrice
-            });
-        }
+public async Task<int> UpdateFutureBookingsPricingAsync(int venueId, PricingType type, decimal? newPrice)
+{
+    const string sql = @"
+        UPDATE bookings
+        SET totalprice = 
+            CASE 
+                WHEN @NewPrice IS NOT NULL AND @NewPrice > 0 
+                THEN @NewPrice * CAST(timeduration AS INTEGER)
+                ELSE totalprice
+            END
+        WHERE venueid = @VenueId
+          AND CAST(timeduration AS INTEGER) = @Type
+          AND bookingdate > NOW()
+          AND status = 'Pending';
+    ";
+
+    if (_db.State != ConnectionState.Open)
+        _db.Open();
+
+    return await _db.ExecuteAsync(sql, new
+    {
+        VenueId = venueId,
+        Type = (int)type,
+        NewPrice = newPrice
+    });
+}
+
         public async Task<IEnumerable<Venue>> GetVenuesByOwnerAsync(int ownerId)
         {
             var sql = @"
-                SELECT * 
-                FROM venues 
-                WHERE ownerid = @OwnerId
-                ORDER BY createdat DESC
-            ";
+            SELECT 
+                v.*,
+                STRING_AGG(vi.imageurl, ',') AS images,
+                MAX(CASE WHEN CAST(vp.type AS INT) = @PerHour THEN vp.price END) AS PerHour,
+                MAX(CASE WHEN CAST(vp.type AS INT) = @PerDay THEN vp.price END) AS PerDay,
+                MAX(CASE WHEN CAST(vp.type AS INT) = @PerEvent THEN vp.price END) AS PerEvent
+            FROM venues v
+            LEFT JOIN venue_images vi ON v.venueid = vi.venueid
+            LEFT JOIN venue_pricings vp ON v.venueid = vp.venueid
+            WHERE v.ownerid = @OwnerId
+            GROUP BY v.venueid, v.name, v.location, v.description, v.capacity, 
+                    v.ownerid, v.createdat, v.updatedat
+            ORDER BY v.createdat DESC;
+        ";
 
-            if (_db.State != ConnectionState.Open)
-                _db.Open();
+        if (_db.State != ConnectionState.Open)
+            _db.Open();
 
-            return await _db.QueryAsync<Venue>(sql, new { OwnerId = ownerId });
+        return await _db.QueryAsync<Venue>(
+            sql,
+            new
+            {
+                OwnerId = ownerId,
+                PerHour = (int)PricingType.PerHour,
+                PerDay = (int)PricingType.PerDay,
+                PerEvent = (int)PricingType.PerEvent
+            }
+        );
+
         }
 
         // ----------------- Get Venue Owner -----------------

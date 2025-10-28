@@ -1,12 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 
 const PricingModal = ({ isOpen, onClose, currentPricing, onSave }) => {
   const [pricing, setPricing] = useState({
-    perHour: currentPricing?.perHour || "",
-    perDay: currentPricing?.perDay || "",
-    perEvent: currentPricing?.perEvent || "",
+    perHour: "",
+    perDay: "",
+    perEvent: "",
   });
+
+  useEffect(() => {
+    if (currentPricing && Array.isArray(currentPricing)) {
+      setPricing({
+        perHour:
+          currentPricing.find((p) => p.type === 0)?.price?.toString() || "",
+        perDay:
+          currentPricing.find((p) => p.type === 1)?.price?.toString() || "",
+        perEvent:
+          currentPricing.find((p) => p.type === 2)?.price?.toString() || "",
+      });
+    }
+  }, [currentPricing]);
 
   if (!isOpen) return null;
 
@@ -14,10 +27,10 @@ const PricingModal = ({ isOpen, onClose, currentPricing, onSave }) => {
     setPricing({ ...pricing, [e.target.name]: e.target.value });
   };
 
-  const handleSave = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(pricing);
-    onClose();
+    onSave(pricing); // ✅ Pass data back to parent
+    onClose();       // ✅ Close modal after saving
   };
 
   return (
@@ -34,7 +47,7 @@ const PricingModal = ({ isOpen, onClose, currentPricing, onSave }) => {
           Update Pricing
         </h2>
 
-        <form onSubmit={handleSave} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="number"
             name="perHour"

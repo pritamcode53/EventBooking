@@ -4,7 +4,7 @@ import AdminBookings from "./AdminBookings";
 import AdminVenues from "./AdminVenues";
 import AdminOwners from "./AdminOwners";
 import AdminAnalytics from "./AdminAnalytics";
-import CancelledBookings from "./CancelledBooking";
+import CancelledBookings from "../CancelledBooking";
 
 const tabs = [
   { name: "Analytics", icon: <BarChart2 size={18} /> },

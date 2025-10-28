@@ -68,46 +68,50 @@ namespace backend.DAL
         }
 
         // ----------------- Cancel/Delete Booking -----------------
-       public async Task<int> CancelBookingAsync(int bookingId, int customerId, string cancelReason)
+      public async Task<int> CancelBookingAsync(int bookingId, int customerId, string cancelReason)
+{
+    var sql = @"
+        INSERT INTO cancelled_bookings (
+            bookingid, venueid, customerid, bookingdate, timeduration, 
+            duration_hours, duration_days, totalprice, status, createdat, 
+            ispaid, cancel_reason, paidamount, dueamount
+        )
+        SELECT 
+            bookingid, venueid, customerid, bookingdate, timeduration, 
+            duration_hours, duration_days, totalprice, status, createdat, 
+            ispaid, @CancelReason, paidamount, dueamount
+        FROM bookings
+        WHERE bookingid = @BookingId AND customerid = @CustomerId;
+
+        DELETE FROM bookings 
+        WHERE bookingid = @BookingId AND customerid = @CustomerId;
+    ";
+
+    if (_db.State != ConnectionState.Open)
+        _db.Open();
+
+    using (var transaction = _db.BeginTransaction())
+    {
+        try
         {
-            var sql = @"
-                INSERT INTO cancelled_bookings (
-                    bookingid, venueid, customerid, bookingdate, timeduration, 
-                    duration_hours, duration_days, totalprice, status, createdat, ispaid, cancel_reason
-                )
-                SELECT 
-                    bookingid, venueid, customerid, bookingdate, timeduration, 
-                    duration_hours, duration_days, totalprice, status, createdat, ispaid, @CancelReason
-                FROM bookings
-                WHERE bookingid = @BookingId AND customerid = @CustomerId;
-
-                DELETE FROM bookings WHERE bookingid = @BookingId AND customerid = @CustomerId;
-            ";
-
-            if (_db.State != ConnectionState.Open)
-                _db.Open();
-
-            using (var transaction = _db.BeginTransaction())
+            int rowsAffected = await _db.ExecuteAsync(sql, new
             {
-                try
-                {
-                    int rowsAffected = await _db.ExecuteAsync(sql, new
-                    {
-                        BookingId = bookingId,
-                        CustomerId = customerId,
-                        CancelReason = cancelReason
-                    }, transaction);
+                BookingId = bookingId,
+                CustomerId = customerId,
+                CancelReason = cancelReason
+            }, transaction);
 
-                    transaction.Commit();
-                    return rowsAffected;
-                }
-                catch
-                {
-                    transaction.Rollback();
-                    throw;
-                }
-            }
+            transaction.Commit();
+            return rowsAffected;
         }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
+    }
+}
+
 
 
         // ----------------- Get all bookings by a customer -----------------

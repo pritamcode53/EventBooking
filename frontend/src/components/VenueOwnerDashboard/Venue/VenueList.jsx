@@ -101,7 +101,7 @@ const VenueList = () => {
       ) : (
         <div className="bg-white shadow-md rounded-lg border border-gray-200 overflow-x-auto">
           {/* ✅ Responsive scrollable table */}
-          <div className="min-w-[700px] md:min-w-full">
+          <div className="min-w-[800px] md:min-w-full">
             <table className="w-full text-sm text-gray-700">
               <thead className="bg-gray-100 text-gray-800">
                 <tr>
@@ -117,6 +117,9 @@ const VenueList = () => {
                   <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[100px]">
                     Capacity
                   </th>
+                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[180px]">
+                    Prices
+                  </th>
                   <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[200px]">
                     Description
                   </th>
@@ -126,11 +129,24 @@ const VenueList = () => {
                 </tr>
               </thead>
               <tbody>
+                
                 {venues.map((venue) => (
                   <VenueCard
                     key={venue.venueId}
-                    venue={venue}
-                    images={venue.venueImages || []}
+                    venue={{
+                      ...venue,
+                      // ✅ Add parsed prices if available
+                      perHour: venue.perHour ?? 0,
+                      perDay: venue.perDay ?? 0,
+                      perEvent: venue.perEvent ?? 0,
+                    }}
+                    images={
+                      Array.isArray(venue.venueImages) && venue.venueImages.length > 0
+                        ? venue.venueImages
+                        : venue.images
+                          ? venue.images.split(",")
+                          : []
+                    }
                     onEdit={() => setEditingVenue(venue)}
                     onDelete={fetchVenues}
                     onUpload={() => setUploadingVenue(venue)}
@@ -155,9 +171,7 @@ const VenueList = () => {
         isOpen={!!uploadingVenue}
         venueData={uploadingVenue}
         onClose={() => setUploadingVenue(null)}
-        onUpload={(images) =>
-          handleUploadImages(uploadingVenue.venueId, images)
-        }
+        onUpload={(images) => handleUploadImages(uploadingVenue.venueId, images)}
       />
 
       <PricingModal
@@ -169,7 +183,7 @@ const VenueList = () => {
             { type: 0, price: Number(pricingData.perHour) },
             { type: 1, price: Number(pricingData.perDay) },
             { type: 2, price: Number(pricingData.perEvent) },
-          ];
+          ].filter((p) => !isNaN(p.price) && p.price > 0);
           handleUpdatePricing(pricingVenue.venueId, payload);
         }}
       />

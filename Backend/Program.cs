@@ -87,6 +87,13 @@ builder.Services.AddScoped<AdminHelper>(sp =>
     var adminDAL = sp.GetRequiredService<AdminDAL>();
     return new AdminHelper(adminDAL);
 });
+// Refund
+builder.Services.AddScoped<RefundDAL>();
+builder.Services.AddScoped<RefundHelper>(sp =>
+{
+    var refundDAL = sp.GetRequiredService<RefundDAL>();
+    return new RefundHelper(refundDAL);
+});
 
 
 // ---------------------- JWT Service ----------------------

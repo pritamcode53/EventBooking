@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { Home, BookOpen, Users, PlusCircle } from "lucide-react";
+import { Home, BookOpen, Users, PlusCircle, XCircle, DollarSign } from "lucide-react";
 import VenueList from "./Venue/VenueList";
 import BookingList from "./Booking/BookingList";
 import ApprovedList from "./Booking/ApprovedList";
 import MultiStepVenueModal from "../../components/MultiStepVenueModal";
+import CancelledBookings from "../CancelledBooking";
+import RefundManagement from "./Booking/RefundManagement";
 
 const VenueOwnerDashboard = () => {
   const [activeTab, setActiveTab] = useState("Venues");
@@ -13,6 +15,8 @@ const VenueOwnerDashboard = () => {
     { name: "Venues", icon: <Home size={18} /> },
     { name: "Bookings", icon: <BookOpen size={18} /> },
     { name: "Approved", icon: <Users size={18} /> },
+    { name: "Cancelled Bookings", icon: <XCircle size={18} /> },
+    { name: "Refund Management", icon: <DollarSign size={18} /> },
     // You can add more tabs here if needed
   ];
 
@@ -24,6 +28,10 @@ const VenueOwnerDashboard = () => {
         return <BookingList />;
       case "Approved":
         return <ApprovedList />;
+      case "Cancelled Bookings":
+        return <CancelledBookings />;
+      case "Refund Management":
+        return <RefundManagement />;
       default:
         return null;
     }

@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { ToastContainer } from "react-toastify"; // <-- import added
-import "react-toastify/dist/ReactToastify.css"; // <-- also import CSS
+import { ToastContainer } from "react-toastify"; 
+import "react-toastify/dist/ReactToastify.css";
 import Header from "./components/Header";
 import Dashboard from "./components/Dashboard";
 import Home from "./components/Home";
@@ -10,6 +10,7 @@ import BlogSection from "./components/BlogSection";
 import DashboardHeader from "./components/DashboardHeader";
 import StepsToBook from "./components/StepsToBook";
 import TopRatedVenues from "./components/TopRatedVenues";
+import Footer from "./components/Footer";
 function App() {
   const location = useLocation();
   const isDashboardRoute =
@@ -28,6 +29,7 @@ function App() {
               {/* <BlogSection /> */}
               <StepsToBook />
               <TopRatedVenues/>
+              <Footer />
               
             </>
           }

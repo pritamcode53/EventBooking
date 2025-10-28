@@ -1,91 +1,117 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import axios from "axios";
 import { motion } from "framer-motion";
-import { Star } from "lucide-react";
-
-const venues = [
-  {
-    id: 1,
-    name: "Royal Palace Banquet Hall",
-    image: "/images/venue1.jpg",
-  },
-  {
-    id: 2,
-    name: "The Orchid Garden",
-    image: "/images/venue2.jpg",
-  },
-  {
-    id: 3,
-    name: "Golden Leaf Resort",
-    image: "/images/venue3.jpg",
-  },
-  {
-    id: 4,
-    name: "Sunset Lawn",
-    image: "/images/venue4.jpg",
-  },
-];
+import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { GET_ALL_TOP_RATED_VENUES, IMAGE_BASE_URL } from "../api/apiConstant";
 
 const TopRatedVenues = () => {
-  const [activeVenue, setActiveVenue] = useState(null);
+  const [venues, setVenues] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const scrollRef = useRef(null);
 
-  const handleToggle = (id) => {
-    if (window.innerWidth <= 768) {
-      setActiveVenue(activeVenue === id ? null : id);
-    }
+  useEffect(() => {
+    const fetchVenues = async () => {
+      try {
+        const res = await axios.get(GET_ALL_TOP_RATED_VENUES);
+        setVenues(res.data || []);
+      } catch (err) {
+        console.error("Error fetching top-rated venues:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVenues();
+  }, []);
+
+  const scrollLeft = () => {
+    scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
   };
 
+  const scrollRight = () => {
+    scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600">Loading top rated venues...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="px-6 py-12 bg-gray-50">
+    <div
+      className="relative px-6 py-16 overflow-hidden absolute inset-0 bg-[radial-gradient(circle_at_center,_#d9f99d_0%,_#ffffff_100%)]"
+      // style={{
+      //   background: "radial-gradient(circle at center, #e8f5e9 0%, #ffffff 80%)",
+      // }}
+    >
+      {/* Header */}
       <div className="text-center mb-10">
         <h2 className="text-3xl font-bold text-gray-800 mb-2">
-           Top Rated Venues
+          Top Rated Venues
         </h2>
-        <p className="text-gray-500">
-          Discover the most loved venues chosen by happy couples.
+        <p className="text-gray-600">
+          Discover the most loved venues chosen by our guests.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {venues.map((venue, index) => {
-          const isActive = activeVenue === venue.id;
-          return (
+      {/* Scroll Buttons */}
+      <button
+        onClick={scrollLeft}
+        className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 shadow-md rounded-full p-2 z-10 hover:bg-gray-100 transition"
+      >
+        <ChevronLeft className="w-6 h-6 text-gray-700" />
+      </button>
+
+      <button
+        onClick={scrollRight}
+        className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 shadow-md rounded-full p-2 z-10 hover:bg-gray-100 transition"
+      >
+        <ChevronRight className="w-6 h-6 text-gray-700" />
+      </button>
+
+      {/* Venue Cards */}
+      <div
+        ref={scrollRef}
+        className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth px-2"
+      >
+        {venues
+          .filter((venue) => venue.averagerating > 0)
+          .map((venue, index) => (
             <motion.div
-              key={venue.id}
-              className="relative rounded-2xl overflow-hidden shadow-lg cursor-pointer group"
+              key={venue.venueid}
+              className="relative min-w-[260px] sm:min-w-[300px] rounded-2xl overflow-hidden shadow-lg bg-white cursor-pointer group flex-shrink-0"
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.15, duration: 0.6 }}
+              transition={{ delay: index * 0.1, duration: 0.5 }}
               viewport={{ once: true }}
-              onClick={() => handleToggle(venue.id)}
             >
               <img
-                src={venue.image}
-                alt={venue.name}
-                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                src={`${IMAGE_BASE_URL}${venue.venueimage}`}
+                alt={venue.venuename}
+                className="w-full h-56 sm:h-64 object-cover group-hover:scale-105 transition-transform duration-500"
               />
 
               {/* Overlay */}
-              <div
-                className={`absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-white text-center transition-all duration-300 ${
-                  isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                }`}
-              >
-                <h3 className="text-lg sm:text-xl font-semibold mb-3 px-3">
-                  {venue.name}
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-center items-center text-center text-white">
+                <h3 className="text-lg font-semibold mb-2 px-3">
+                  {venue.venuename}
                 </h3>
-                <button className="bg-pink-500 hover:bg-pink-600 px-4 py-2 rounded-full text-sm sm:text-base transition-all">
+                <button className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-full text-sm transition">
                   Book Now
                 </button>
               </div>
 
-              {/* Top-right badge */}
+              {/* Rating Badge */}
               <div className="absolute top-3 right-3 bg-white rounded-full px-3 py-1 flex items-center shadow-md">
                 <Star className="w-4 h-4 text-yellow-500 mr-1" />
-                <span className="text-sm font-medium text-gray-700">4.9</span>
+                <span className="text-sm font-medium text-gray-700">
+                  {venue.averagerating?.toFixed(1)}
+                </span>
               </div>
             </motion.div>
-          );
-        })}
+          ))}
       </div>
     </div>
   );

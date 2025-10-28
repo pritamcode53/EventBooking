@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { ADMIN_GET_CANCEL, ADMIN_TOTAL_BOOKINGS, ADMIN_TOTAL_COST,ADMIN_TOTAL_DUE  } from "../api/apiConstant";
+import { ADMIN_GET_CANCEL, ADMIN_TOTAL_BOOKINGS, ADMIN_TOTAL_COST,ADMIN_TOTAL_DUE  } from "../../api/apiConstant";
 import { Users, DollarSign, Loader2,XCircle  } from "lucide-react";
 import { Bar, Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from "chart.js";
@@ -86,7 +86,7 @@ const AdminAnalytics = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: { position: "bottom" },
-      title: { display: true, text: "Cancellation Rate (%)", font: { size: 16 } },
+      title: { display: true, text: " Amount Insights", font: { size: 16 } },
     },
   };
 
@@ -109,7 +109,7 @@ const AdminAnalytics = () => {
             <DollarSign className="text-green-600" size={24} />
           </div>
           <div>
-            <p className="text-gray-500 uppercase text-sm">Total Revenue</p>
+            <p className="text-gray-500 uppercase text-sm">Total Paid Amount</p>
             <p className="text-2xl font-bold text-gray-800">₹{totalRevenue.toLocaleString()}</p>
           </div>
         </div>
@@ -119,7 +119,7 @@ const AdminAnalytics = () => {
             <DollarSign className="text-green-600" size={24} />
           </div>
           <div>
-            <p className="text-gray-500 uppercase text-sm">Total Revenue</p>
+            <p className="text-gray-500 uppercase text-sm">Total Due Amount</p>
             <p className="text-2xl font-bold text-gray-800">₹{totalDue.toLocaleString()}</p>
           </div>
         </div>

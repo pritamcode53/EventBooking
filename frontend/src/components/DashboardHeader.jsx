@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { LogOut, Menu } from "lucide-react";
+import { LogOut, Menu, Home } from "lucide-react";
 import axios from "axios";
 import { USER_LOGOUT, USER_PROFILE } from "../api/apiConstant";
 import { useNavigate } from "react-router-dom";
@@ -16,14 +16,18 @@ const DashboardHeader = () => {
         const profileRes = await axios.get(USER_PROFILE, {
           withCredentials: true,
         });
-        setUserName(profileRes.data.data.name);
+         if (profileRes.data?.data?.name) {
+          setUserName(profileRes.data.data.name);
+        } else {
+          navigate("/"); // redirect if missing user data
+        }
       } catch (error) {
         console.error("Error fetching user profile", error);
+        navigate("/");
       }
     };
     fetchProfile();
 
-    // Optional: Refresh profile every 30s
     const interval = setInterval(fetchProfile, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -50,6 +54,14 @@ const DashboardHeader = () => {
 
         {/* Desktop Section */}
         <div className="hidden md:flex items-center gap-6">
+          {/* ✅ Home Button */}
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 text-gray-700 hover:text-blue-600 font-medium transition"
+          >
+            <Home size={18} /> Home
+          </button>
+
           <span className="font-medium text-gray-700">
             {userName ? `Hi, ${userName}` : "User"}
           </span>
@@ -73,6 +85,17 @@ const DashboardHeader = () => {
       {/* Mobile Dropdown */}
       {menuOpen && (
         <div className="md:hidden bg-white/90 backdrop-blur-md border-t border-gray-200 shadow-inner flex flex-col items-center py-4 space-y-3">
+          {/* ✅ Home Button (Mobile) */}
+          <button
+            onClick={() => {
+              navigate("/");
+              setMenuOpen(false);
+            }}
+            className="flex items-center gap-2 text-gray-700 hover:text-blue-600 font-medium transition"
+          >
+            <Home size={18} /> Home
+          </button>
+
           <span className="font-medium text-gray-700">
             {userName ? `Hi, ${userName}` : "User"}
           </span>

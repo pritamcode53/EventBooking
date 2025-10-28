@@ -41,7 +41,7 @@ namespace backend.Controllers
                 throw new UnauthorizedAccessException("User not authenticated");
 
             var user = await _userHelper.GetUserByIdAsync(userId.Value);
-            if (user == null || user.Role != UserRole.Admin)
+            if (user == null || user.Role != UserRole.Admin && user.Role != UserRole.VenueOwner)
                 throw new UnauthorizedAccessException("Only admins can perform this action");
 
             return userId.Value;

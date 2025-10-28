@@ -10,9 +10,7 @@ CREATE TABLE IF NOT EXISTS bookings (
     createdat TIMESTAMP NOT NULL DEFAULT NOW(),
     duration_hours INT,
     duration_days INT,
-    ispaid BOOLEAN DEFAULT FALSE,
-
-    -- ✅ New fields for payment tracking
+    ispaid BOOLEAN DEFAULT FALSE,    
     paymentstatus VARCHAR(20) DEFAULT 'Unpaid' 
         CHECK (paymentstatus IN ('Unpaid', 'Partial', 'Paid')),
     paidamount NUMERIC(10,2) DEFAULT 0.00,
