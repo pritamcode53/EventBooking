@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import VenueCard from "./VenueCard";
+import VenueCard from "./Home/Venue/VenueCard";
 import { GET_ALL_VENUES } from "../api/apiConstant";
 
 const AllVenues = () => {

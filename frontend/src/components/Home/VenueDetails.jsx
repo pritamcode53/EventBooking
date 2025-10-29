@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { IMAGE_BASE_URL } from "../api/apiConstant";
+import { IMAGE_BASE_URL } from "../../api/apiConstant";
 
 const VenueDetails = ({ venue, onClose }) => {
   // Lightbox state

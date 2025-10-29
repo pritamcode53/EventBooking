@@ -101,7 +101,7 @@ namespace backend.DAL
             return await _db.QueryFirstOrDefaultAsync<VenuePricing>(sql, new
             {
                 VenueId = venueId,        // matches INT column
-                Type = ((int)type).ToString()     // convert enum to string to match VARCHAR
+                Type = (int)type     // convert enum to string to match VARCHAR
             });
         }
 

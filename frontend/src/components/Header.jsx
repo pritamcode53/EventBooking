@@ -111,7 +111,9 @@ const Header = () => {
             className="text-2xl font-bold text-blue-600 cursor-pointer"
             onClick={() => navigate("/")}
           >
-            Event<span className="text-indigo-500">Book</span>
+           <h2 className="text-2xl font-bold text-green-700 mb-3">
+          Event<span className="text-lime-500">Book</span>
+        </h2>
           </div>
 
           {/* Desktop Menu */}

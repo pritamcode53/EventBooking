@@ -4,7 +4,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Header from "./components/Header";
 import Dashboard from "./components/Dashboard";
-import Home from "./components/Home";
+import Home from "./components/Home/Home";
 import AllVenues from "./components/AllVenues";
 import BlogSection from "./components/BlogSection";
 import DashboardHeader from "./components/DashboardHeader";

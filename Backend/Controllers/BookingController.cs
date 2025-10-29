@@ -55,14 +55,28 @@ namespace backend.Controllers
         // ---------------- Customer APIs ----------------
         [Authorize]
         [HttpPost("create")]
-        public async Task<IActionResult> CreateBooking([FromBody] BookingCreateDto dto)
-        {
-            var userId = GetUserIdFromToken();
-            if (userId == null) return Unauthorized();
+public async Task<IActionResult> CreateBooking([FromBody] BookingCreateDto dto)
+{
+    var userId = GetUserIdFromToken();
+    if (userId == null)
+        return Unauthorized(new { Message = "User not authorized" });
 
-            var bookingId = await _helper.CreateBookingAsync(dto, userId.Value);
-            return Ok(new { BookingId = bookingId, Message = "Booking request created successfully" });
-        }
+    try
+    {
+        var bookingId = await _helper.CreateBookingAsync(dto, userId.Value);
+        return Ok(new
+        {
+            BookingId = bookingId,
+            Message = "Booking request created successfully"
+        });
+    }
+    catch (Exception ex)
+    {
+        // Here you catch "Venue not found", "Venue not available", etc.
+        return BadRequest(new { Message = ex.Message });
+    }
+}
+
 
         [Authorize]
         [HttpPost("{bookingId}/cancel")]
