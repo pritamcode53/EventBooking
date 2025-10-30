@@ -3,7 +3,7 @@ import { Filter, X } from "lucide-react";
 
 const HeaderSection = ({ isFilterOpen, toggleFilter }) => {
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+    <div id="venues" className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
       <h1 className="text-3xl font-bold text-gray-800">Explore Venues</h1>
       <button
         onClick={toggleFilter}

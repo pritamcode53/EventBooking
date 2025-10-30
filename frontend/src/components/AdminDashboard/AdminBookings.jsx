@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { ADMIN_GET_BOOKINGS } from "../../api/apiConstant";
-import { Loader2, CheckCircle, XCircle, Calendar, User, Home } from "lucide-react";
+import {
+  Loader2,
+  CheckCircle,
+  XCircle,
+  Calendar,
+  User,
+  Home,
+  Clock,
+} from "lucide-react";
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -34,7 +42,7 @@ const AdminBookings = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-40">
-        <Loader2 className="animate-spin text-blue-500" size={32} />
+        <Loader2 className="animate-spin text-green-500" size={32} />
       </div>
     );
   }
@@ -44,11 +52,13 @@ const AdminBookings = () => {
   }
 
   return (
-    <div className="bg-white shadow rounded-lg overflow-hidden p-4">
+    <div className="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100 p-4">
       {/* Table container */}
       <div className="overflow-x-auto">
-        {/* Table Header */}
-        <div className="min-w-[700px] grid grid-cols-6 gap-4 px-4 py-2 bg-gray-100 font-semibold text-gray-700">
+        {/* Header */}
+        <div className="min-w-[800px] grid grid-cols-6 gap-4 px-4 py-3 
+                        bg-green-100
+                         font-semibold uppercase tracking-wide text-sm">
           <span>Venue</span>
           <span>Customer</span>
           <span>Date</span>
@@ -57,32 +67,35 @@ const AdminBookings = () => {
           <span>Status</span>
         </div>
 
-        {/* Table Rows */}
-        {bookings.map((b) => (
+        {/* Rows */}
+        {bookings.map((b, i) => (
           <div
-            key={b.bookingId}
-            className="min-w-[700px] grid grid-cols-6 gap-4 items-center px-4 py-3 border-b hover:bg-gray-50 transition-colors"
+            key={b.bookingId || i}
+            className="min-w-[800px] grid grid-cols-6 gap-4 items-center px-4 py-3 
+                       border-b border-gray-100 text-gray-700
+                       hover:bg-green-50 transition-all duration-200 ease-in-out"
           >
             {/* Venue */}
-            <div className="flex items-center gap-2">
-              <Home size={16} className="text-blue-500" />
+            <div className="flex items-center gap-2 font-medium">
+              <Home size={16} className="text-green-600" />
               {b.venueName || "Unknown Venue"}
             </div>
 
             {/* Customer */}
             <div className="flex items-center gap-2">
-              <User size={16} className="text-gray-400" />
+              <User size={16} className="text-gray-500" />
               {b.customerName || "Anonymous"}
             </div>
 
             {/* Booking Date */}
             <div className="flex items-center gap-2">
-              <Calendar size={16} className="text-gray-400" />
+              <Calendar size={16} className="text-gray-500" />
               {new Date(b.bookingDate).toLocaleDateString()}
             </div>
 
             {/* Duration */}
-            <div>
+            <div className="flex items-center gap-1">
+              <Clock size={16} className="text-gray-500" />
               {b.durationDays
                 ? `${b.durationDays} day(s)`
                 : b.durationHours
@@ -91,7 +104,9 @@ const AdminBookings = () => {
             </div>
 
             {/* Total Price */}
-            <div>₹{b.totalPrice?.toLocaleString() || "-"}</div>
+            <div className="font-semibold text-gray-800">
+              ₹{b.totalPrice?.toLocaleString() || "-"}
+            </div>
 
             {/* Status */}
             <div className="flex items-center gap-1">
@@ -102,28 +117,40 @@ const AdminBookings = () => {
               ) : (
                 <XCircle className="text-red-500" size={18} />
               )}
-              <span className="capitalize">{b.status}</span>
+              <span
+                className={`capitalize font-medium ${
+                  b.status === "Approved"
+                    ? "text-green-600"
+                    : b.status === "Pending"
+                    ? "text-yellow-600"
+                    : "text-red-600"
+                }`}
+              >
+                {b.status}
+              </span>
             </div>
           </div>
         ))}
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex justify-center items-center mt-4 gap-3">
+      <div className="flex justify-center items-center mt-5 gap-4">
         <button
-          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          className="px-4 py-1.5 bg-green-100 text-green-700 rounded-full hover:bg-green-200 
+                     disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm transition"
           disabled={pageNumber <= 1}
           onClick={() => setPageNumber((prev) => prev - 1)}
         >
           Previous
         </button>
 
-        <span>
+        <span className="text-gray-700 font-medium">
           Page {pageNumber} of {totalPages}
         </span>
 
         <button
-          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          className="px-4 py-1.5 bg-green-100 text-green-700 rounded-full hover:bg-green-200 
+                     disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm transition"
           disabled={pageNumber >= totalPages}
           onClick={() => setPageNumber((prev) => prev + 1)}
         >

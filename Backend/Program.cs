@@ -95,6 +95,13 @@ builder.Services.AddScoped<RefundHelper>(sp =>
     return new RefundHelper(refundDAL);
 });
 
+// Custom Booking
+builder.Services.AddScoped<CustomBookingDAL>();
+builder.Services.AddScoped<CustomBookingHelper>(sp =>
+{
+    var customBookingDAL = sp.GetRequiredService<CustomBookingDAL>();
+    return new CustomBookingHelper(customBookingDAL);
+});
 
 // ---------------------- JWT Service ----------------------
 builder.Services.AddSingleton<JwtService>();

@@ -19,7 +19,7 @@ const VenueDetails = ({ venue, onClose }) => {
   const nextImage = () => setCurrentIndex((prev) => (prev + 1) % lightboxImages.length);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
       <div className="bg-white rounded-2xl w-full max-w-4xl p-6 relative shadow-xl overflow-y-auto max-h-[90vh]">
         {/* Close Button */}
         <button

@@ -11,6 +11,7 @@ import DashboardHeader from "./components/DashboardHeader";
 import StepsToBook from "./components/StepsToBook";
 import TopRatedVenues from "./components/TopRatedVenues";
 import Footer from "./components/Footer";
+import Landing from "./components/Landing";
 function App() {
   const location = useLocation();
   const isDashboardRoute =
@@ -25,6 +26,7 @@ function App() {
           path="/"
           element={
             <>
+              <Landing />
               <Home />
               {/* <BlogSection /> */}
               <StepsToBook />

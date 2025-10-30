@@ -11,7 +11,7 @@ const AdminVenues = () => {
     const fetchVenues = async () => {
       try {
         const response = await axios.get(ADMIN_GET_VENUES, { withCredentials: true });
-        setVenues(response.data || []); // assuming API returns an array of venues
+        setVenues(response.data || []);
       } catch (error) {
         console.error("Error fetching venues:", error);
       } finally {
@@ -24,38 +24,43 @@ const AdminVenues = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-40">
-        <Loader2 className="animate-spin text-blue-500" size={32} />
+        <Loader2 className="animate-spin text-green-600" size={32} />
       </div>
     );
   }
 
   if (!venues.length) {
-    return <div className="text-center text-gray-500 py-10">No venues found.</div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        No venues found.
+      </div>
+    );
   }
 
   return (
-    <div className="bg-white shadow rounded-lg overflow-hidden">
-      {/* Horizontal scroll container */}
+    <div className="bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-100">
+      {/* Header */}
       <div className="overflow-x-auto">
-        {/* Header */}
-        <div className="min-w-[500px] grid grid-cols-3 gap-4 px-4 py-2 bg-gray-100 font-semibold text-gray-700">
+        <div className="min-w-[500px] grid grid-cols-3 gap-4 px-4 py-3 bg-green-100  font-semibold text-sm uppercase tracking-wide">
           <span>Venue Name</span>
           <span>Location</span>
           <span>Capacity</span>
         </div>
 
         {/* Rows */}
-        {venues.map((v) => (
+        {venues.map((v, index) => (
           <div
             key={v.venueId}
-            className="min-w-[500px] grid grid-cols-3 gap-4 items-center px-4 py-3 border-b hover:bg-gray-50 transition-colors"
+            className={`min-w-[500px] grid grid-cols-3 gap-4 items-center px-4 py-3 text-sm transition-all duration-200 ${
+              index % 2 === 0 ? "bg-gray-50" : "bg-white"
+            } hover:bg-green-50 hover:shadow-sm`}
           >
-            <div className="flex items-center gap-2">
-              <Home size={16} className="text-blue-500" />
+            <div className="flex items-center gap-2 font-medium text-gray-800">
+              <Home size={16} className="text-green-500" />
               {v.name || "Unknown Venue"}
             </div>
-            <div>{v.location || "-"}</div>
-            <div>{v.capacity || "-"}</div>
+            <div className="text-gray-700">{v.location || "-"}</div>
+            <div className="text-gray-700">{v.capacity || "-"}</div>
           </div>
         ))}
       </div>

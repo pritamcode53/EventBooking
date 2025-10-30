@@ -8,3 +8,6 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+.rbc-toolbar-label + .rbc-btn-group {
+  display: none; /* hides built-in view buttons */
+}

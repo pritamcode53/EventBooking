@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { APPROVED_VENUE, PAYMENT } from "../../../api/apiConstant";
-import { Calendar, User, MapPin, CheckCircle, X } from "lucide-react";
+import { CheckCircle, X } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -15,12 +15,15 @@ const ApprovedList = () => {
 
   const fetchApprovedBookings = async () => {
     try {
+      setLoading(true);
       const res = await axios.get(APPROVED_VENUE, { withCredentials: true });
       const filtered = res.data.filter((b) => b.status === "Approved");
       setApprovedBookings(filtered);
     } catch (err) {
       console.error("Error fetching approved bookings:", err);
       toast.error("Failed to load approved bookings.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,94 +71,121 @@ const ApprovedList = () => {
     fetchApprovedBookings();
   }, []);
 
+  if (loading)
+    return (
+      <p className="text-center py-6 text-gray-500">
+        Loading approved bookings...
+      </p>
+    );
+
+  if (!approvedBookings.length)
+    return (
+      <p className="text-center py-6 text-gray-500">
+        No Approved Bookings Found
+      </p>
+    );
+
   return (
-    <div className="px-3 sm:px-6 lg:px-10 py-6 min-h-screen bg-green-50">
-      <h2 className="text-xl sm:text-2xl font-semibold text-green-800 mb-6 text-center">
+    <div className="p-4 sm:p-6">
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">
         Approved Bookings
       </h2>
 
-      {approvedBookings.length === 0 ? (
-        <p className="text-gray-500 text-center text-sm sm:text-base">
-          No Approved Bookings Found
-        </p>
-      ) : (
-        <div className="overflow-x-auto bg-white rounded-2xl shadow-md border border-green-100">
-          <table className="min-w-full text-sm sm:text-base text-gray-700">
-            <thead className="bg-green-100 text-green-800 font-semibold">
-              <tr>
-                <th className="py-3 px-4 text-left">Venue Name</th>
-                <th className="py-3 px-4 text-left">Customer</th>
-                <th className="py-3 px-4 text-left">Date</th>
-                <th className="py-3 px-4 text-left">Location</th>
-                <th className="py-3 px-4 text-left">Total Price</th>
-                <th className="py-3 px-4 text-left">Paid</th>
-                <th className="py-3 px-4 text-left">Due</th>
-                <th className="py-3 px-4 text-left">Payment Status</th>
-                <th className="py-3 px-4 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {approvedBookings.map((b, index) => (
-                <tr
-                  key={b.bookingId}
-                  className={`border-b hover:bg-green-50 transition-all ${
-                    index % 2 === 0 ? "bg-white" : "bg-green-50/50"
-                  }`}
-                >
-                  <td className="py-3 px-4 font-medium">
-                    {b.venue?.name || "Unknown Venue"}
-                  </td>
-                  <td className="py-3 px-4">{b.customer?.name || "Guest User"}</td>
-                  <td className="py-3 px-4">
-                    {new Date(b.bookingDate).toLocaleDateString()} <br />
-                    <span className="text-xs text-gray-500">
-                      {new Date(b.bookingDate).toLocaleTimeString()}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">{b.venue?.location || "-"}</td>
-                  <td className="py-3 px-4 font-semibold text-gray-900">
-                    ₹{b.totalPrice?.toLocaleString()}
-                  </td>
-                  <td className="py-3 px-4 text-green-600 font-semibold">
-                    ₹{b.paidAmount?.toLocaleString() || 0}
-                  </td>
-                  <td className="py-3 px-4 text-red-600 font-semibold">
-                    ₹{b.dueAmount?.toLocaleString() || 0}
-                  </td>
-                  <td className="py-3 px-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
-                        b.paymentStatus === "Paid"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
+      {/* ✅ Table Section */}
+      <div className="overflow-x-auto bg-white rounded-2xl shadow-md">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-green-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                #
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Venue Name
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Customer
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Date
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Total Price
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Paid
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Due
+              </th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Action
+              </th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-gray-100">
+            {approvedBookings.map((b, index) => (
+              <tr
+                key={b.bookingId}
+                className="hover:bg-green-50 transition duration-150"
+              >
+                <td className="px-4 py-3 text-sm text-gray-600">
+                  {index + 1}
+                </td>
+                <td className="px-4 py-3 text-sm font-medium text-gray-800">
+                  {b.venue?.name || "Unknown Venue"}
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-700">
+                  {b.customer?.name || "Guest"}
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-700">
+                  {new Date(b.bookingDate).toLocaleDateString()}
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-700">
+                  ₹{b.totalPrice?.toLocaleString()}
+                </td>
+                <td className="px-4 py-3 text-sm text-green-600 font-semibold">
+                  ₹{b.paidAmount?.toLocaleString() || 0}
+                </td>
+                <td className="px-4 py-3 text-sm text-red-600 font-semibold">
+                  ₹{b.dueAmount?.toLocaleString() || 0}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <span
+                    className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                      b.paymentStatus === "Paid"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {b.paymentStatus || "Pending"}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-center">
+                  {b.dueAmount > 0 ? (
+                    <button
+                      onClick={() => openPaymentModal(b)}
+                      className="bg-green-500 text-white text-xs font-medium px-3 py-1.5 rounded-full hover:bg-green-600 transition"
                     >
-                      {b.paymentStatus || "Pending"}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    {b.dueAmount > 0 ? (
-                      <button
-                        onClick={() => openPaymentModal(b)}
-                        className="bg-green-500 text-white px-3 py-1.5 rounded-lg hover:bg-green-600 transition"
-                      >
-                        Update
-                      </button>
-                    ) : (
-                      <CheckCircle className="text-green-500 mx-auto" size={20} />
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                      Update
+                    </button>
+                  ) : (
+                    <CheckCircle className="text-green-500 mx-auto" size={18} />
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* ✅ Payment Modal */}
       {showModal && selectedBooking && (
-        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 backdrop-blur-sm px-3 animate-fadeIn">
-          <div className="bg-white rounded-2xl w-full max-w-xs sm:max-w-sm md:max-w-md p-6 relative shadow-xl">
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 backdrop-blur-sm px-3">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-6 relative shadow-xl">
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
@@ -163,7 +193,7 @@ const ApprovedList = () => {
               <X size={20} />
             </button>
 
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 text-center">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
               Update Payment
             </h2>
 

@@ -37,7 +37,7 @@ const steps = [
 
 const StepsToBook = () => {
   return (
-    <div className="relative py-16 px-6 sm:px-12 lg:px-20 overflow-hidden">
+    <div id="howToBook" className="relative py-16 px-6 sm:px-12 lg:px-20 overflow-hidden">
       {/* 🌿 Radial Gradient Background */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#d9f99d_0%,_#ffffff_100%)]"></div>
 

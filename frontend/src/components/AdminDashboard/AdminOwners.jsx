@@ -24,7 +24,7 @@ const AdminOwners = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-40">
-        <Loader2 className="animate-spin text-blue-500" size={32} />
+        <Loader2 className="animate-spin text-green-500" size={32} />
       </div>
     );
   }
@@ -34,11 +34,12 @@ const AdminOwners = () => {
   }
 
   return (
-    <div className="bg-white shadow rounded-lg overflow-hidden">
-      {/* Horizontal scroll container */}
+    <div className="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
       <div className="overflow-x-auto">
         {/* Header */}
-        <div className="min-w-[700px] grid grid-cols-5 gap-4 px-4 py-2 bg-gray-100 font-semibold text-gray-700">
+        <div className="min-w-[700px] grid grid-cols-5 gap-4 px-4 py-3 
+                        bg-green-100 
+                         font-semibold text-sm uppercase tracking-wide">
           <span>Name</span>
           <span>Email</span>
           <span>Phone</span>
@@ -47,20 +48,23 @@ const AdminOwners = () => {
         </div>
 
         {/* Rows */}
-        {owners.map((o) => (
+        {owners.map((o, index) => (
           <div
-            key={o.ownerId}
-            className="min-w-[700px] grid grid-cols-5 gap-4 items-center px-4 py-3 border-b hover:bg-gray-50 transition-colors"
+            key={o.ownerId || index}
+            className="min-w-[700px] grid grid-cols-5 gap-4 items-center px-4 py-3
+                       border-b border-gray-100 text-gray-700
+                       hover:bg-green-50 transition-all duration-200 ease-in-out"
           >
-            <div className="flex items-center gap-2">
-              <Users size={16} className="text-blue-500" />
+            <div className="flex items-center gap-2 font-medium">
+              <Users size={16} className="text-green-600" />
               {o.name || "Unknown"}
             </div>
             <div>{o.email || "-"}</div>
             <div>{o.phone || "-"}</div>
             <div>{new Date(o.registeredAt).toLocaleDateString()}</div>
             <div>
-              <button className="px-2 py-1 text-white bg-blue-600 rounded hover:bg-blue-700 text-sm">
+              <button className="px-3 py-1 text-sm text-white bg-green-600 rounded-full 
+                                 hover:bg-green-700 transition-colors duration-150">
                 View
               </button>
             </div>

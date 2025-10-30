@@ -9,6 +9,8 @@ export const USER_PROFILE = `${BASE_URL}/user/profile`;
 //Home Page URL
 export const GET_ALL_VENUES = `${BASE_URL}/home/all`;
 export const GET_ALL_TOP_RATED_VENUES = `${BASE_URL}/review/top-rated`;
+export const GET_LOCATIONS_BASED_VENUES = `${BASE_URL}/home/locations`;
+// http://localhost:5232/api/home/locations
 //cancel booking
 export const CANCEL_BOOKING = (bookingId) =>
   `${BASE_URL}/booking/${bookingId}/cancel`;
@@ -38,7 +40,7 @@ export const PAYMENT = `${BASE_URL}/payment/create`;
 
 //Refund section - venue owner 
 export const POST_REFUND_PAYMENT = `${BASE_URL}/refund/process`;
-export const GET_REFUND_CANCELLED_BOOKINGS = `${BASE_URL}/refund/paid-cancelled`;
+export const GET_REFUND_CANCELLED_BOOKINGS = `${BASE_URL}/refund/refundable-users`;
 
 // =============================
 // 👑 ADMIN API ENDPOINTS

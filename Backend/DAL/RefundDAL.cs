@@ -13,17 +13,23 @@ public class RefundDAL
 
     public async Task<bool> ProcessRefundAsync(RefundDTO refund, int processedBy)
     {
-        //  Queries
         string getCancelledBookingSql = @"
             SELECT bookingid, paidamount 
             FROM cancelled_bookings 
             WHERE cancelled_id = @CancelledId;
         ";
 
+        string getRejectedBookingSql = @"
+            SELECT bookingid, paidamount 
+            FROM bookings 
+            WHERE bookingid = @BookingId AND status = 'Rejected';
+        ";
+
         string checkExistingRefundSql = @"
             SELECT COUNT(*) 
             FROM refunds 
-            WHERE cancelledid = @CancelledId;
+            WHERE (@CancelledId IS NOT NULL AND cancelledid = @CancelledId)
+               OR (@CancelledId IS NULL AND bookingid = @BookingId);
         ";
 
         string insertSql = @"
@@ -52,44 +58,63 @@ public class RefundDAL
         {
             try
             {
-                // Check if refund already processed for this cancelled booking
+                // ✅ Step 1: Check if refund already processed
                 int existingRefundCount = await _db.ExecuteScalarAsync<int>(
                     checkExistingRefundSql,
-                    new { refund.CancelledId },
+                    new
+                    {
+                        CancelledId = refund.CancelledId,
+                        BookingId = refund.BookingId
+                    },
                     transaction
                 );
 
                 if (existingRefundCount > 0)
-                    throw new InvalidOperationException("Refund already processed for this cancelled booking.");
+                    throw new InvalidOperationException("Refund already processed for this booking.");
 
-                //  Fetch bookingid and paidamount from cancelled_bookings
-                var cancelledData = await _db.QueryFirstOrDefaultAsync<dynamic>(
-                    getCancelledBookingSql,
-                    new { refund.CancelledId },
-                    transaction
-                );
+                // ✅ Step 2: Fetch data depending on type (Cancelled vs Rejected)
+                dynamic? bookingData = null;
 
-                if (cancelledData == null)
-                    throw new InvalidOperationException("Refund not allowed: Cancelled booking not found.");
+                if (refund.CancelledId.HasValue)
+                {
+                    bookingData = await _db.QueryFirstOrDefaultAsync<dynamic>(
+                        getCancelledBookingSql,
+                        new { CancelledId = refund.CancelledId.Value },
+                        transaction
+                    );
+                }
+                else
+                {
+                    bookingData = await _db.QueryFirstOrDefaultAsync<dynamic>(
+                        getRejectedBookingSql,
+                        new { BookingId = refund.BookingId },
+                        transaction
+                    );
+                }
 
-                int bookingId = cancelledData.bookingid;
-                decimal paidAmount = cancelledData.paidamount;
+                if (bookingData == null)
+                    throw new InvalidOperationException("Refund not allowed: Booking not found.");
+
+                int bookingId = (int)bookingData.bookingid;
+                decimal paidAmount = (decimal)bookingData.paidamount;
 
                 if (paidAmount <= 0)
                     throw new InvalidOperationException("Refund not allowed: No payment was made for this booking.");
 
-                //  Use provided refund amount or default to paid amount
                 decimal refundAmount = refund.RefundAmount > 0 ? refund.RefundAmount : paidAmount;
 
-                //  Insert refund record
-                await _db.ExecuteAsync(insertSql, new
-                {
-                    BookingId = bookingId,
-                    refund.CancelledId,
-                    RefundAmount = refundAmount,
-                    RefundedBy = processedBy,
-                    refund.Remarks
-                }, transaction);
+                await _db.ExecuteAsync(
+                    insertSql,
+                    new
+                    {
+                        BookingId = bookingId,
+                        CancelledId = refund.CancelledId,
+                        RefundAmount = refundAmount,
+                        RefundedBy = processedBy,
+                        Remarks = refund.Remarks
+                    },
+                    transaction
+                );
 
                 transaction.Commit();
                 return true;
@@ -102,39 +127,67 @@ public class RefundDAL
         }
     }
 
-    public async Task<IEnumerable<dynamic>> GetPaidCancelledUsersAsync(bool excludeRefunded = true)
+    // ✅ Combined API for Cancelled + Rejected Refunds
+    public async Task<IEnumerable<dynamic>> GetRefundableBookingsAsync(bool excludeRefunded = true)
     {
         string sql = @"
-        SELECT 
-            cb.cancelled_id,
-            cb.bookingid,
-            cb.customerid,
-            cb.venueid,
-            cb.paidamount,
-            cb.totalprice,
-            cb.cancel_reason,
-            cb.cancelled_at,
-            u.name,
-            u.email,
-            v.name
-        FROM cancelled_bookings cb
-        INNER JOIN users u ON cb.customerid = u.userid
-        INNER JOIN venues v ON cb.venueid = v.venueid
-        WHERE cb.paidamount > 0 
-    ";
+            SELECT 
+                cb.cancelled_id AS cancelled_id,
+                cb.bookingid AS bookingid,
+                cb.customerid AS customerid,
+                cb.venueid AS venueid,
+                cb.paidamount AS paidamount,
+                cb.totalprice AS totalprice,
+                cb.cancel_reason AS reason,
+                cb.cancelled_at AS created_at,
+                u.name AS customer_name,
+                u.email AS customer_email,
+                v.name AS venue_name,
+                'Cancelled' AS type
+            FROM cancelled_bookings cb
+            INNER JOIN users u ON cb.customerid = u.userid
+            INNER JOIN venues v ON cb.venueid = v.venueid
+            WHERE cb.paidamount > 0
+            {0}
 
-        if (excludeRefunded)
-        {
-            sql += " AND cb.cancelled_id NOT IN (SELECT cancelledid FROM refunds)";
-        }
+            UNION ALL
 
-        sql += " ORDER BY cb.cancelled_at DESC;";
+            SELECT 
+                NULL AS cancelled_id,
+                b.bookingid AS bookingid,
+                b.customerid AS customerid,
+                b.venueid AS venueid,
+                b.paidamount AS paidamount,
+                b.totalprice AS totalprice,
+                b.status AS reason,
+                b.createdat AS created_at,
+                u.name AS customer_name,
+                u.email AS customer_email,
+                v.name AS venue_name,
+                'Rejected' AS type
+            FROM bookings b
+            INNER JOIN users u ON b.customerid = u.userid
+            INNER JOIN venues v ON b.venueid = v.venueid
+            WHERE b.status = 'Rejected'
+              AND b.paidamount > 0
+              {1}
+
+            ORDER BY created_at DESC;
+        ";
+
+        string cancelledFilter = excludeRefunded
+            ? "AND cb.cancelled_id NOT IN (SELECT cancelledid FROM refunds)"
+            : "";
+
+        string rejectedFilter = excludeRefunded
+            ? "AND b.bookingid NOT IN (SELECT bookingid FROM refunds)"
+            : "";
+
+        string finalSql = string.Format(sql, cancelledFilter, rejectedFilter);
 
         if (_db.State != ConnectionState.Open)
             _db.Open();
 
-        var result = await _db.QueryAsync<dynamic>(sql);
-        return result;
+        return await _db.QueryAsync<dynamic>(finalSql);
     }
-
 }

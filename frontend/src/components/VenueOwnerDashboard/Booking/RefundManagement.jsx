@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  GET_REFUND_CANCELLED_BOOKINGS,
+  GET_REFUND_CANCELLED_BOOKINGS, // this will now return both
   POST_REFUND_PAYMENT,
 } from "../../../api/apiConstant";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 
 const RefundManagement = () => {
-  const [cancelledBookings, setCancelledBookings] = useState([]);
+  const [refundList, setRefundList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -15,13 +15,12 @@ const RefundManagement = () => {
   const [remarks, setRemarks] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // Fetch cancelled bookings
   const fetchRefundBookings = async () => {
     try {
       const res = await axios.get(GET_REFUND_CANCELLED_BOOKINGS, {
         withCredentials: true,
       });
-      setCancelledBookings(res.data || []);
+      setRefundList(res.data || []);
     } catch (err) {
       console.error("Error fetching refund bookings:", err);
     } finally {
@@ -33,7 +32,6 @@ const RefundManagement = () => {
     fetchRefundBookings();
   }, []);
 
-  // Handle Refund Submission
   const handleRefund = async () => {
     if (!selected || !refundAmount)
       return alert("Enter refund amount and remarks.");
@@ -43,20 +41,21 @@ const RefundManagement = () => {
       await axios.post(
         POST_REFUND_PAYMENT,
         {
-          CancelledId: selected.cancelled_id,
+          cancelledId: selected.cancelled_id, // ✅ may be null if rejected
+          bookingId: selected.bookingid,      // ✅ always safe
           refundAmount: parseFloat(refundAmount),
           remarks,
         },
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
 
-      setSuccessMsg(`Refund processed for booking ID ${selected.bookingid}`);
+      setSuccessMsg(
+        `Refund processed for booking ID ${selected.bookingid} (${selected.type})`
+      );
       setSelected(null);
       setRefundAmount("");
       setRemarks("");
-      fetchRefundBookings(); // refresh list
+      fetchRefundBookings();
     } catch (err) {
       console.error("Error processing refund:", err);
       alert("Refund failed. Please try again.");
@@ -85,9 +84,9 @@ const RefundManagement = () => {
         </div>
       )}
 
-      {cancelledBookings.length === 0 ? (
+      {refundList.length === 0 ? (
         <p className="text-gray-600 text-center py-10 text-sm sm:text-base">
-          No cancelled bookings available for refund.
+          No cancelled or rejected bookings available for refund.
         </p>
       ) : (
         <div className="overflow-x-auto bg-white shadow rounded-xl">
@@ -98,27 +97,23 @@ const RefundManagement = () => {
                 <th className="px-3 sm:px-4 py-3">Customer</th>
                 <th className="px-3 sm:px-4 py-3">Venue</th>
                 <th className="px-3 sm:px-4 py-3">Paid Amount</th>
-                <th className="px-3 sm:px-4 py-3">Cancel Reason</th>
+                <th className="px-3 sm:px-4 py-3">Type</th>
                 <th className="px-3 sm:px-4 py-3 text-center">Action</th>
               </tr>
             </thead>
             <tbody>
-              {cancelledBookings.map((item, index) => (
+              {refundList.map((item, index) => (
                 <tr
-                  key={item.cancelled_id}
+                  key={index}
                   className="border-b hover:bg-gray-50 text-gray-700"
                 >
                   <td className="px-3 sm:px-4 py-3">{index + 1}</td>
-                  <td className="px-3 sm:px-4 py-3 break-words">{item.name}</td>
-                  <td className="px-3 sm:px-4 py-3 break-words">
-                    {item.venuename}
-                  </td>
+                  <td className="px-3 sm:px-4 py-3">{item.customer_name}</td>
+                  <td className="px-3 sm:px-4 py-3">{item.venue_name}</td>
                   <td className="px-3 sm:px-4 py-3 text-green-600 font-semibold">
                     ₹{item.paidamount}
                   </td>
-                  <td className="px-3 sm:px-4 py-3 text-gray-600 break-words max-w-[180px]">
-                    {item.cancel_reason}
-                  </td>
+                  <td className="px-3 sm:px-4 py-3">{item.type}</td>
                   <td className="px-3 sm:px-4 py-3 text-center">
                     <button
                       onClick={() => setSelected(item)}
@@ -134,7 +129,6 @@ const RefundManagement = () => {
         </div>
       )}
 
-      {/* Refund Modal */}
       {selected && (
         <div className="fixed inset-0 flex justify-center items-center bg-black/40 backdrop-blur-sm z-50 px-3 sm:px-0">
           <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 w-full max-w-sm sm:max-w-md">

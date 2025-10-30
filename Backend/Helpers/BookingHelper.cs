@@ -151,7 +151,7 @@ namespace backend.Helpers
                 throw new Exception("Invalid status for owner approval");
 
             int result = await _dal.UpdateBookingStatusByOwnerAsync(bookingId, ownerId, status);
-
+            
             // ----------------- Email Notification to Customer -----------------
             var booking = await _dal.GetBookingByIdAsync(bookingId); // Make sure this exists
             if (booking != null)

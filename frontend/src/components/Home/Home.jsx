@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { GET_ALL_VENUES } from "../../api/apiConstant";
+import { GET_ALL_VENUES, GET_LOCATIONS_BASED_VENUES } from "../../api/apiConstant";
 import HeaderSection from "./HeaderSection";
 import FilterPanel from "./FilterPanel";
 import VenueGrid from "./VenueGrid";
@@ -50,7 +50,7 @@ const Home = () => {
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const res = await axios.get("http://localhost:5232/api/home/locations");
+        const res = await axios.get(GET_LOCATIONS_BASED_VENUES);
         setLocationOptions(res.data.data || []);
       } catch (err) {
         console.error("Failed to fetch locations", err);

@@ -8,7 +8,7 @@ const Tabs = ({ tabs, activeTab, onTabChange }) => (
         onClick={() => onTabChange(tab.name)}
         className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-all ${
           activeTab === tab.name
-            ? "bg-blue-600 text-white shadow-md"
+            ? "bg-green-600 text-white shadow-md"
             : "bg-white text-gray-700 hover:bg-gray-200"
         }`}
       >

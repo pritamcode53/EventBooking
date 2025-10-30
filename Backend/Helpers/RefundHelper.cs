@@ -12,9 +12,12 @@ public class RefundHelper
         return await _refundDal.ProcessRefundAsync(refundDto, processedBy);
     }
 
-    public async Task<IEnumerable<dynamic>> GetPaidCancelledUsersAsync(bool excludeRefunded = true)
-    {
-        return await _refundDal.GetPaidCancelledUsersAsync(excludeRefunded);
-    }
+   public async Task<IEnumerable<dynamic>> GetRefundableBookingsAsync(bool excludeRefunded = true)
+        {
+            var refundableBookings = await _refundDal.GetRefundableBookingsAsync(excludeRefunded);
+            return refundableBookings;
+        }
+
+
 
 }

@@ -84,82 +84,83 @@ const VenueList = () => {
     }
   };
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="flex justify-center items-center h-64">
-        <p>Loading venues...</p>
-      </div>
+      <p className="text-center py-6 text-gray-500">Loading venues...</p>
     );
-  }
+
+  if (!venues.length)
+    return (
+      <p className="text-center py-6 text-gray-500">No venues found</p>
+    );
 
   return (
-    <>
-      {venues.length === 0 ? (
-        <div className="flex justify-center items-center h-64">
-          <p>No venues found.</p>
-        </div>
-      ) : (
-        <div className="bg-white shadow-md rounded-lg border border-gray-200 overflow-x-auto">
-          {/* ✅ Responsive scrollable table */}
-          <div className="min-w-[800px] md:min-w-full">
-            <table className="w-full text-sm text-gray-700">
-              <thead className="bg-gray-100 text-gray-800">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[120px]">
-                    Image
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[150px]">
-                    Name
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[150px]">
-                    Location
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[100px]">
-                    Capacity
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[180px]">
-                    Prices
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[200px]">
-                    Description
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap min-w-[180px]">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                
-                {venues.map((venue) => (
-                  <VenueCard
-                    key={venue.venueId}
-                    venue={{
-                      ...venue,
-                      // ✅ Add parsed prices if available
-                      perHour: venue.perHour ?? 0,
-                      perDay: venue.perDay ?? 0,
-                      perEvent: venue.perEvent ?? 0,
-                    }}
-                    images={
-                      Array.isArray(venue.venueImages) && venue.venueImages.length > 0
-                        ? venue.venueImages
-                        : venue.images
-                          ? venue.images.split(",")
-                          : []
-                    }
-                    onEdit={() => setEditingVenue(venue)}
-                    onDelete={fetchVenues}
-                    onUpload={() => setUploadingVenue(venue)}
-                    onPrice={() => setPricingVenue(venue)}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+    <div className="p-4 sm:p-6">
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">
+        Venue List
+      </h2>
 
-      {/* Modals */}
+      {/* ✅ Responsive Table */}
+      <div className="overflow-x-auto bg-white rounded-2xl shadow-md">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-green-50">
+            <tr>
+              {/* <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                #
+              </th> */}
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Image
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Name
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Location
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Capacity
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Prices
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Description
+              </th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-gray-100">
+            {venues.map((venue, index) => (
+              <VenueCard
+                key={venue.venueId}
+                venue={{
+                  ...venue,
+                  perHour: venue.perHour ?? 0,
+                  perDay: venue.perDay ?? 0,
+                  perEvent: venue.perEvent ?? 0,
+                }}
+                images={
+                  Array.isArray(venue.venueImages) && venue.venueImages.length > 0
+                    ? venue.venueImages
+                    : venue.images
+                    ? venue.images.split(",")
+                    : []
+                }
+                onEdit={() => setEditingVenue(venue)}
+                onDelete={fetchVenues}
+                onUpload={() => setUploadingVenue(venue)}
+                onPrice={() => setPricingVenue(venue)}
+                index={index + 1}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* ✅ Modals */}
       <EditVenueModal
         isOpen={!!editingVenue}
         venueData={editingVenue}
@@ -171,7 +172,9 @@ const VenueList = () => {
         isOpen={!!uploadingVenue}
         venueData={uploadingVenue}
         onClose={() => setUploadingVenue(null)}
-        onUpload={(images) => handleUploadImages(uploadingVenue.venueId, images)}
+        onUpload={(images) =>
+          handleUploadImages(uploadingVenue.venueId, images)
+        }
       />
 
       <PricingModal
@@ -187,7 +190,7 @@ const VenueList = () => {
           handleUpdatePricing(pricingVenue.venueId, payload);
         }}
       />
-    </>
+    </div>
   );
 };
 

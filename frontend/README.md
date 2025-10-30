@@ -95,3 +95,4 @@ This platform bridges the gap between venue providers and customers, offering an
 
 ## Conclusion
 This Event and Venue Management & Booking System will provide a robust, scalable, and user-friendly platform that caters to all stakeholders—customers, venue owners, and administrators. By centralizing venue management and booking operations, it will save time, reduce operational complexity, and enhance customer satisfaction.
+

@@ -70,12 +70,25 @@ public class RefundController : ControllerBase
         }
     }
 
-    [HttpGet("paid-cancelled")]
-    public async Task<IActionResult> GetPaidCancelledUsers([FromQuery] bool excludeRefunded = true)
+    // [HttpGet("paid-cancelled")]
+    // public async Task<IActionResult> GetPaidCancelledUsers([FromQuery] bool excludeRefunded = true)
+    // {
+    //     try
+    //     {
+    //         var users = await _refundHelper.GetPaidCancelledUsersAsync(excludeRefunded);
+    //         return Ok(users);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+    //     }
+    // }
+    [HttpGet("refundable-users")]
+    public async Task<IActionResult> GetPaidRejectedUsers([FromQuery] bool excludeRefunded = true)
     {
         try
         {
-            var users = await _refundHelper.GetPaidCancelledUsersAsync(excludeRefunded);
+            var users = await _refundHelper.GetRefundableBookingsAsync(excludeRefunded);
             return Ok(users);
         }
         catch (Exception ex)
