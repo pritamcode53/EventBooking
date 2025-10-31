@@ -13,17 +13,26 @@ namespace backend.Helpers
         private readonly BookingDAL _dal;
         private readonly VenueDAL _venueDAL;
         private readonly MailService _mailService;
-        private readonly UserDAL _userDAL; // Add UserDAL to fetch owner/customer info
+        private readonly UserDAL _userDAL;
         private readonly PaymentDAL _paymentDAL;
-
+        private readonly NotificationDAL _notificationDAL; // ✅ Added
         private readonly IHubContext<NotificationHub> _hubContext;
-        public BookingHelper(BookingDAL dal, VenueDAL venueDAL, MailService mailService, UserDAL userDAL, PaymentDAL paymentDAL, IHubContext<NotificationHub> hubContext)
+
+        public BookingHelper(
+            BookingDAL dal,
+            VenueDAL venueDAL,
+            MailService mailService,
+            UserDAL userDAL,
+            PaymentDAL paymentDAL,
+            NotificationDAL notificationDAL, // ✅ Injected
+            IHubContext<NotificationHub> hubContext)
         {
             _dal = dal;
             _venueDAL = venueDAL;
             _mailService = mailService;
             _userDAL = userDAL;
             _paymentDAL = paymentDAL;
+            _notificationDAL = notificationDAL;
             _hubContext = hubContext;
         }
 
@@ -71,14 +80,11 @@ namespace backend.Helpers
                 CreatedAt = DateTime.UtcNow
             };
 
-            // Step 1: Add booking
             int bookingId = await _dal.AddBookingAsync(booking);
 
-            // Step 2: Generate and save Booking Code
             string bookingCode = $"BKN-{dto.VenueId}{customerId}{bookingId}";
             await _dal.UpdateBookingCodeAsync(bookingId, bookingCode);
 
-            // ----------------- Email Notification -----------------
             var owner = await _userDAL.GetUserByIdAsync(venue.OwnerId);
             if (owner != null && !string.IsNullOrEmpty(owner.Email))
             {
@@ -86,16 +92,18 @@ namespace backend.Helpers
                 string body = $"Hello {owner.Name},\n\n" +
                               $"A new booking (Code: {bookingCode}) has been made for your venue \"{venue.Name}\" " +
                               $"on {booking.BookingDate:yyyy-MM-dd HH:mm}. Please review and approve/reject it.";
+
                 await _mailService.SendEmailAsync(owner.Email, subject, body);
+
+                // ✅ Store notification in DB
+                string message = $"New booking request for {venue.Name} on {booking.BookingDate:yyyy-MM-dd HH:mm}.";
+                await _notificationDAL.AddNotificationAsync(owner.UserId, message);
+
+                // ✅ Send real-time notification (if online)
+                await _hubContext.Clients.User(owner.UserId.ToString())
+                    .SendAsync("ReceiveNotification", message);
             }
 
-            if (owner != null && !string.IsNullOrEmpty(owner.Email))
-            {
-                // Console.WriteLine("Reached");
-                await _hubContext.Clients.User(owner.UserId.ToString())
-                .SendAsync("ReceiveNotification",
-                    $"New booking request received for {venue.Name} on {booking.BookingDate:yyyy-MM-dd HH:mm}");
-            }
             return bookingId;
         }
 
@@ -138,13 +146,12 @@ namespace backend.Helpers
 
             return bookings;
         }
+
         public async Task<IEnumerable<Booking>> GetApprovedBookingsByOwnerAsync(int ownerId)
         {
             return await _dal.GetApprovedBookingsByOwnerAsync(ownerId);
         }
 
-
-        //-------- for venue owner ------------------
         public async Task<IEnumerable<Booking>> GetPendingBookingsForOwnerAsync(int ownerId)
         {
             return await _dal.GetPendingBookingsByOwnerAsync(ownerId);
@@ -156,9 +163,7 @@ namespace backend.Helpers
             return await _dal.IsVenueAvailableAsync(venueId, date, hours);
         }
 
-        // ----------------- Approve/Reject Booking (Venue Owner) -----------------
-
-
+        // ----------------- Approve/Reject Booking -----------------
         public async Task<int> UpdateBookingStatusByOwnerAsync(int bookingId, int ownerId, BookingStatus status)
         {
             if (status != BookingStatus.Approved && status != BookingStatus.Rejected)
@@ -166,45 +171,38 @@ namespace backend.Helpers
 
             int result = await _dal.UpdateBookingStatusByOwnerAsync(bookingId, ownerId, status);
 
-            // ----------------- Email Notification to Customer -----------------
             var booking = await _dal.GetBookingByIdAsync(bookingId);
             if (booking != null)
             {
                 var customer = await _userDAL.GetUserByIdAsync(booking.CustomerId);
                 if (customer != null && !string.IsNullOrEmpty(customer.Email))
                 {
-                    string subject = $"Your booking for venue has been {status}";
+                    string subject = $"Your booking has been {status}";
                     string body = $"Hello {customer.Name},\n\n" +
                                   $"Your booking for venue ID {booking.VenueId} on {booking.BookingDate:yyyy-MM-dd HH:mm} " +
                                   $"has been {status}.";
-
                     await _mailService.SendEmailAsync(customer.Email, subject, body);
-                }
 
-                // ----------------- 🔔 Real-Time Notification -----------------
-                if (customer != null)
-                {
-                    Console.WriteLine(customer.Name);
+                    // ✅ Store notification in DB
+                    string message = $"Your booking for venue ID {booking.VenueId} on {booking.BookingDate:yyyy-MM-dd HH:mm} has been {status}.";
+                    await _notificationDAL.AddNotificationAsync(customer.UserId, message);
+
+                    // ✅ Real-Time Notification
                     var connectionId = NotificationHub.GetConnectionId(customer.UserId.ToString());
                     if (!string.IsNullOrEmpty(connectionId))
                     {
-                        await _hubContext.Clients.Client(connectionId).SendAsync(
-                            "ReceiveNotification",
-                            $"Hello {customer.Name},\n\n" +
-                            $"Your booking for venue ID {booking.VenueId} on {booking.BookingDate:yyyy-MM-dd HH:mm} has been {status}."
-                        );
-
+                        await _hubContext.Clients.Client(connectionId)
+                            .SendAsync("ReceiveNotification", message);
                         Console.WriteLine($"📢 Notification sent to user {customer.UserId}");
                     }
                     else
                     {
-                        Console.WriteLine($"⚠️ User {customer.UserId} not connected.");
+                        Console.WriteLine($"⚠️ User {customer.UserId} offline, notification stored in DB.");
                     }
                 }
             }
 
             return result;
         }
-
     }
 }

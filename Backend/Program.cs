@@ -53,16 +53,33 @@ builder.Services.AddScoped<VenueHelper>(sp =>
 
 // Booking
 builder.Services.AddScoped<BookingDAL>();
+builder.Services.AddScoped<VenueDAL>();
+builder.Services.AddScoped<UserDAL>();
+builder.Services.AddScoped<PaymentDAL>();
+builder.Services.AddScoped<NotificationDAL>(); // ✅ Added this line
+builder.Services.AddScoped<MailService>();
+
 builder.Services.AddScoped<BookingHelper>(sp =>
 {
     var bookingDAL = sp.GetRequiredService<BookingDAL>();
     var venueDAL = sp.GetRequiredService<VenueDAL>();
     var paymentDAL = sp.GetRequiredService<PaymentDAL>();
-    var mailService = sp.GetRequiredService<MailService>(); // inject MailService
-    var userDAL = sp.GetRequiredService<UserDAL>();         // inject UserDAL for fetching owner/customer info
+    var mailService = sp.GetRequiredService<MailService>();
+    var userDAL = sp.GetRequiredService<UserDAL>();
+    var notificationDAL = sp.GetRequiredService<NotificationDAL>(); // ✅ Added for notifications
     var hubContext = sp.GetRequiredService<IHubContext<NotificationHub>>();
-    return new BookingHelper(bookingDAL, venueDAL, mailService, userDAL, paymentDAL,hubContext);
+
+    return new BookingHelper(
+        bookingDAL,
+        venueDAL,
+        mailService,
+        userDAL,
+        paymentDAL,
+        notificationDAL,  // ✅ Pass as argument
+        hubContext
+    );
 });
+
 // Review
 builder.Services.AddScoped<ReviewDAL>();
 builder.Services.AddScoped<ReviewHelper>(sp =>
