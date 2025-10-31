@@ -141,3 +141,9 @@ D:\csharp\EventBooking\Backend\obj\Debug\net8.0\refint\Backend.dll
 D:\csharp\EventBooking\Backend\obj\Debug\net8.0\Backend.pdb
 D:\csharp\EventBooking\Backend\obj\Debug\net8.0\Backend.genruntimeconfig.cache
 D:\csharp\EventBooking\Backend\obj\Debug\net8.0\ref\Backend.dll
+D:\EventBooking\Backend\bin\Debug\net8.0\Microsoft.Extensions.Diagnostics.Abstractions.dll
+D:\EventBooking\Backend\bin\Debug\net8.0\Microsoft.Extensions.Hosting.Abstractions.dll
+D:\EventBooking\Backend\bin\Debug\net8.0\Microsoft.Extensions.ObjectPool.dll
+D:\EventBooking\Backend\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
+D:\EventBooking\Backend\bin\Debug\net8.0\Newtonsoft.Json.dll
+D:\EventBooking\Backend\bin\Debug\net8.0\System.Net.WebSockets.WebSocketProtocol.dll

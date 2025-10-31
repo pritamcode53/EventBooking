@@ -3,6 +3,8 @@ using backend.Models;
 using backend.DTOs;
 using backend.Common.Enums;
 using backend.Services;
+using Microsoft.AspNetCore.SignalR;
+using backend.Hubs;
 
 namespace backend.Helpers
 {
@@ -13,79 +15,89 @@ namespace backend.Helpers
         private readonly MailService _mailService;
         private readonly UserDAL _userDAL; // Add UserDAL to fetch owner/customer info
         private readonly PaymentDAL _paymentDAL;
-        public BookingHelper(BookingDAL dal, VenueDAL venueDAL, MailService mailService, UserDAL userDAL , PaymentDAL paymentDAL)
+
+        private readonly IHubContext<NotificationHub> _hubContext;
+        public BookingHelper(BookingDAL dal, VenueDAL venueDAL, MailService mailService, UserDAL userDAL, PaymentDAL paymentDAL, IHubContext<NotificationHub> hubContext)
         {
             _dal = dal;
             _venueDAL = venueDAL;
             _mailService = mailService;
             _userDAL = userDAL;
             _paymentDAL = paymentDAL;
+            _hubContext = hubContext;
         }
 
         // ----------------- Create Booking -----------------
-      public async Task<int> CreateBookingAsync(BookingCreateDto dto, int customerId)
-{
-    var venue = await _venueDAL.GetVenueByIdAsync(dto.VenueId);
-    if (venue == null)
-        throw new Exception("Venue not found");
+        public async Task<int> CreateBookingAsync(BookingCreateDto dto, int customerId)
+        {
+            var venue = await _venueDAL.GetVenueByIdAsync(dto.VenueId);
+            if (venue == null)
+                throw new Exception("Venue not found");
 
-    int multiplier = dto.TimeDuration switch
-    {
-        PricingType.PerHour => dto.DurationHours,
-        PricingType.PerDay => dto.DurationDays,
-        PricingType.PerEvent => 1,
-        _ => dto.DurationHours
-    };
+            int multiplier = dto.TimeDuration switch
+            {
+                PricingType.PerHour => dto.DurationHours,
+                PricingType.PerDay => dto.DurationDays,
+                PricingType.PerEvent => 1,
+                _ => dto.DurationHours
+            };
 
-    var available = await _dal.IsVenueAvailableAsync(dto.VenueId, dto.BookingDate, multiplier);
-    if (!available)
-        throw new Exception("Venue not available at this time");
+            var available = await _dal.IsVenueAvailableAsync(dto.VenueId, dto.BookingDate, multiplier);
+            if (!available)
+                throw new Exception("Venue not available at this time");
 
-    var pricing = await _venueDAL.GetVenuePricingAsync(dto.VenueId, dto.TimeDuration);
-    if (pricing == null)
-        throw new Exception($"No pricing found for {dto.TimeDuration}");
+            var pricing = await _venueDAL.GetVenuePricingAsync(dto.VenueId, dto.TimeDuration);
+            if (pricing == null)
+                throw new Exception($"No pricing found for {dto.TimeDuration}");
 
-    decimal totalPrice = dto.TimeDuration switch
-    {
-        PricingType.PerHour => pricing.Price * dto.DurationHours,
-        PricingType.PerDay => pricing.Price * dto.DurationDays,
-        PricingType.PerEvent => pricing.Price,
-        _ => pricing.Price
-    };
+            decimal totalPrice = dto.TimeDuration switch
+            {
+                PricingType.PerHour => pricing.Price * dto.DurationHours,
+                PricingType.PerDay => pricing.Price * dto.DurationDays,
+                PricingType.PerEvent => pricing.Price,
+                _ => pricing.Price
+            };
 
-    var booking = new Booking
-    {
-        VenueId = dto.VenueId,
-        CustomerId = customerId,
-        BookingDate = dto.BookingDate,
-        TimeDuration = dto.TimeDuration,
-        DurationHours = dto.DurationHours,
-        DurationDays = dto.DurationDays,
-        TotalPrice = totalPrice,
-        Status = BookingStatus.Pending,
-        CreatedAt = DateTime.UtcNow
-    };
+            var booking = new Booking
+            {
+                VenueId = dto.VenueId,
+                CustomerId = customerId,
+                BookingDate = dto.BookingDate,
+                TimeDuration = dto.TimeDuration,
+                DurationHours = dto.DurationHours,
+                DurationDays = dto.DurationDays,
+                TotalPrice = totalPrice,
+                Status = BookingStatus.Pending,
+                CreatedAt = DateTime.UtcNow
+            };
 
-    // Step 1: Add booking
-    int bookingId = await _dal.AddBookingAsync(booking);
+            // Step 1: Add booking
+            int bookingId = await _dal.AddBookingAsync(booking);
 
-    // Step 2: Generate and save Booking Code
-    string bookingCode = $"BKN-{dto.VenueId}{customerId}{bookingId}";
-    await _dal.UpdateBookingCodeAsync(bookingId, bookingCode);
+            // Step 2: Generate and save Booking Code
+            string bookingCode = $"BKN-{dto.VenueId}{customerId}{bookingId}";
+            await _dal.UpdateBookingCodeAsync(bookingId, bookingCode);
 
-    // ----------------- Email Notification -----------------
-    var owner = await _userDAL.GetUserByIdAsync(venue.OwnerId);
-    if (owner != null && !string.IsNullOrEmpty(owner.Email))
-    {
-        string subject = $"New Booking Request for {venue.Name}";
-        string body = $"Hello {owner.Name},\n\n" +
-                      $"A new booking (Code: {bookingCode}) has been made for your venue \"{venue.Name}\" " +
-                      $"on {booking.BookingDate:yyyy-MM-dd HH:mm}. Please review and approve/reject it.";
-        await _mailService.SendEmailAsync(owner.Email, subject, body);
-    }
+            // ----------------- Email Notification -----------------
+            var owner = await _userDAL.GetUserByIdAsync(venue.OwnerId);
+            if (owner != null && !string.IsNullOrEmpty(owner.Email))
+            {
+                string subject = $"New Booking Request for {venue.Name}";
+                string body = $"Hello {owner.Name},\n\n" +
+                              $"A new booking (Code: {bookingCode}) has been made for your venue \"{venue.Name}\" " +
+                              $"on {booking.BookingDate:yyyy-MM-dd HH:mm}. Please review and approve/reject it.";
+                await _mailService.SendEmailAsync(owner.Email, subject, body);
+            }
 
-    return bookingId;
-}
+            if (owner != null && !string.IsNullOrEmpty(owner.Email))
+            {
+                // Console.WriteLine("Reached");
+                await _hubContext.Clients.User(owner.UserId.ToString())
+                .SendAsync("ReceiveNotification",
+                    $"New booking request received for {venue.Name} on {booking.BookingDate:yyyy-MM-dd HH:mm}");
+            }
+            return bookingId;
+        }
 
         // ----------------- Update Booking Status -----------------
         public async Task<int> UpdateBookingStatusAsync(int bookingId, BookingStatus status, int customerId)
@@ -94,9 +106,9 @@ namespace backend.Helpers
         }
 
         // ----------------- Cancel Booking -----------------
-        public async Task<int> CancelBookingAsync(int bookingId, int customerId ,  string cancelReason)
+        public async Task<int> CancelBookingAsync(int bookingId, int customerId, string cancelReason)
         {
-            return await _dal.CancelBookingAsync(bookingId, customerId , cancelReason);
+            return await _dal.CancelBookingAsync(bookingId, customerId, cancelReason);
         }
 
         // ----------------- Get Customer Bookings -----------------
@@ -121,7 +133,7 @@ namespace backend.Helpers
                     }
                 }
                 var payment = await _paymentDAL.GetPaymentsByBookingIdAsync(booking.BookingId);
-               booking.IsPaid = payment != null && payment.Any(p => p.Status == "Success");
+                booking.IsPaid = payment != null && payment.Any(p => p.Status == "Success");
             }
 
             return bookings;
@@ -145,29 +157,54 @@ namespace backend.Helpers
         }
 
         // ----------------- Approve/Reject Booking (Venue Owner) -----------------
+
+
         public async Task<int> UpdateBookingStatusByOwnerAsync(int bookingId, int ownerId, BookingStatus status)
         {
             if (status != BookingStatus.Approved && status != BookingStatus.Rejected)
                 throw new Exception("Invalid status for owner approval");
 
             int result = await _dal.UpdateBookingStatusByOwnerAsync(bookingId, ownerId, status);
-            
+
             // ----------------- Email Notification to Customer -----------------
-            var booking = await _dal.GetBookingByIdAsync(bookingId); // Make sure this exists
+            var booking = await _dal.GetBookingByIdAsync(bookingId);
             if (booking != null)
             {
-                var customer = await _userDAL.GetUserByIdAsync(booking.CustomerId); // fetch customer info
+                var customer = await _userDAL.GetUserByIdAsync(booking.CustomerId);
                 if (customer != null && !string.IsNullOrEmpty(customer.Email))
                 {
                     string subject = $"Your booking for venue has been {status}";
                     string body = $"Hello {customer.Name},\n\n" +
                                   $"Your booking for venue ID {booking.VenueId} on {booking.BookingDate:yyyy-MM-dd HH:mm} " +
                                   $"has been {status}.";
+
                     await _mailService.SendEmailAsync(customer.Email, subject, body);
+                }
+
+                // ----------------- 🔔 Real-Time Notification -----------------
+                if (customer != null)
+                {
+                    Console.WriteLine(customer.Name);
+                    var connectionId = NotificationHub.GetConnectionId(customer.UserId.ToString());
+                    if (!string.IsNullOrEmpty(connectionId))
+                    {
+                        await _hubContext.Clients.Client(connectionId).SendAsync(
+                            "ReceiveNotification",
+                            $"Hello {customer.Name},\n\n" +
+                            $"Your booking for venue ID {booking.VenueId} on {booking.BookingDate:yyyy-MM-dd HH:mm} has been {status}."
+                        );
+
+                        Console.WriteLine($"📢 Notification sent to user {customer.UserId}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"⚠️ User {customer.UserId} not connected.");
+                    }
                 }
             }
 
             return result;
         }
+
     }
 }

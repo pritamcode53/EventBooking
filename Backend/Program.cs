@@ -6,6 +6,8 @@ using backend.Services;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.SignalR;
+using backend.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,7 +60,8 @@ builder.Services.AddScoped<BookingHelper>(sp =>
     var paymentDAL = sp.GetRequiredService<PaymentDAL>();
     var mailService = sp.GetRequiredService<MailService>(); // inject MailService
     var userDAL = sp.GetRequiredService<UserDAL>();         // inject UserDAL for fetching owner/customer info
-    return new BookingHelper(bookingDAL, venueDAL, mailService, userDAL, paymentDAL);
+    var hubContext = sp.GetRequiredService<IHubContext<NotificationHub>>();
+    return new BookingHelper(bookingDAL, venueDAL, mailService, userDAL, paymentDAL,hubContext);
 });
 // Review
 builder.Services.AddScoped<ReviewDAL>();
@@ -157,7 +160,8 @@ builder.Services.AddControllers()
 // ---------------------- Swagger ----------------------
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+// Add SignalR
+builder.Services.AddSignalR();
 var app = builder.Build();
 
 // ---------------------- Middleware ----------------------
@@ -173,6 +177,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles();
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 // ---------------------- Run App ----------------------
 app.Run();

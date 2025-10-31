@@ -1,36 +1,76 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { LogOut, Menu, Home } from "lucide-react";
 import axios from "axios";
 import { USER_LOGOUT, USER_PROFILE } from "../api/apiConstant";
 import { useNavigate } from "react-router-dom";
+import { HubConnectionBuilder } from "@microsoft/signalr";
+import NotificationBell from "./NotificationBell";
+import MobileMenu from "./MobileMenu";
 
 const DashboardHeader = () => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
+  const [userId, setUserId] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const connectionRef = useRef(null);
 
-  // Fetch user profile
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // ✅ Fetch user profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const profileRes = await axios.get(USER_PROFILE, {
           withCredentials: true,
         });
-         if (profileRes.data?.data?.name) {
+        if (profileRes.data?.data?.name) {
           setUserName(profileRes.data.data.name);
-        } else {
-          navigate("/"); // redirect if missing user data
-        }
-      } catch (error) {
-        console.error("Error fetching user profile", error);
+          setUserId(profileRes.data.data.userId);
+        } else navigate("/");
+      } catch {
         navigate("/");
       }
     };
     fetchProfile();
+  }, [navigate]);
 
-    const interval = setInterval(fetchProfile, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  // ✅ SignalR connection setup
+  useEffect(() => {
+    if (!userId) return;
+    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+    const connectSignalR = async () => {
+      try {
+        const connection = new HubConnectionBuilder()
+          .withUrl(`http://localhost:5232/hubs/notifications?userId=${userId}`, {
+            withCredentials: true,
+          })
+          .withAutomaticReconnect()
+          .build();
+
+        connectionRef.current = connection;
+        await connection.start();
+        console.log("✅ Connected to Notification Hub");
+
+        connection.on("ReceiveNotification", (message) => {
+          const newNote = { message, timestamp: Date.now() };
+          const stored = JSON.parse(localStorage.getItem("notifications")) || [];
+          const updated = [newNote, ...stored].filter(
+            (n) => Date.now() - n.timestamp < SEVEN_DAYS_MS
+          );
+          localStorage.setItem("notifications", JSON.stringify(updated));
+          setNotifications(updated.map((n) => n.message));
+          setUnreadCount((prev) => prev + 1);
+        });
+      } catch (err) {
+        console.error("SignalR Error:", err);
+      }
+    };
+
+    connectSignalR();
+    return () => connectionRef.current?.stop();
+  }, [userId]);
 
   const handleLogout = async () => {
     try {
@@ -42,7 +82,7 @@ const DashboardHeader = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full z-40 backdrop-blur-lg bg-white/70 border-b border-gray-200 shadow-sm">
+    <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg bg-white/70 border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
         {/* Logo */}
         <div
@@ -53,8 +93,7 @@ const DashboardHeader = () => {
         </div>
 
         {/* Desktop Section */}
-        <div className="hidden md:flex items-center gap-6">
-          {/* ✅ Home Button */}
+        <div className="hidden md:flex items-center gap-6 relative">
           <button
             onClick={() => navigate("/")}
             className="flex items-center gap-2 text-gray-700 hover:text-blue-600 font-medium transition"
@@ -62,6 +101,12 @@ const DashboardHeader = () => {
             <Home size={18} /> Home
           </button>
 
+          <NotificationBell
+            notifications={notifications}
+            unreadCount={unreadCount}
+            setUnreadCount={setUnreadCount}
+          />
+
           <span className="font-medium text-gray-700">
             {userName ? `Hi, ${userName}` : "User"}
           </span>
@@ -74,40 +119,26 @@ const DashboardHeader = () => {
           </button>
         </div>
 
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
+        {/* 🔔 Mobile Icons Section */}
+        <div className="md:hidden flex items-center gap-4">
+          <NotificationBell
+            notifications={notifications}
+            unreadCount={unreadCount}
+            setUnreadCount={setUnreadCount}
+          />
           <button onClick={() => setMenuOpen(!menuOpen)}>
             <Menu size={28} />
           </button>
         </div>
       </div>
 
-      {/* Mobile Dropdown */}
-      {menuOpen && (
-        <div className="md:hidden bg-white/90 backdrop-blur-md border-t border-gray-200 shadow-inner flex flex-col items-center py-4 space-y-3">
-          {/* ✅ Home Button (Mobile) */}
-          <button
-            onClick={() => {
-              navigate("/");
-              setMenuOpen(false);
-            }}
-            className="flex items-center gap-2 text-gray-700 hover:text-blue-600 font-medium transition"
-          >
-            <Home size={18} /> Home
-          </button>
-
-          <span className="font-medium text-gray-700">
-            {userName ? `Hi, ${userName}` : "User"}
-          </span>
-
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full shadow transition flex items-center gap-2"
-          >
-            <LogOut size={18} /> Logout
-          </button>
-        </div>
-      )}
+      {/* Mobile Dropdown Menu */}
+      <MobileMenu
+        menuOpen={menuOpen}
+        navigate={navigate}
+        userName={userName}
+        handleLogout={handleLogout}
+      />
     </header>
   );
 };

@@ -31,7 +31,7 @@ const ReviewModal = ({ data, onClose, refresh }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-transparent bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-xl shadow-xl w-96">
         <form onSubmit={submitReview}>
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">
@@ -81,7 +81,7 @@ const ReviewModal = ({ data, onClose, refresh }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+              className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
             >
               Submit
             </button>

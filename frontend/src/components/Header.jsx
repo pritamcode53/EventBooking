@@ -64,9 +64,6 @@ const Header = () => {
               </button>
             ) : (
               <>
-                <span className="font-medium text-gray-700">
-                  Welcome, <span className="font-semibold text-blue-600">{userName}</span>
-                </span>
                 <button
                   onClick={() => navigate("/dashboard")}
                   className="text-gray-700 hover:text-blue-600 font-medium"
@@ -102,9 +99,6 @@ const Header = () => {
               </button>
             ) : (
               <>
-                <span className="font-medium text-gray-700">
-                  Hi, <span className="font-semibold text-blue-600">{userName}</span>
-                </span>
                 <button
                   onClick={() => {
                     navigate("/dashboard");

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "TLh+/TcTrej7u+lKqFmIGh9KDj77wrCsWE3UV/0hMlI=",
+  "Hash": "C6dGMHG1vudPz5RFwn6Fg54AEMnqLw5aMKmGxEj33/4=",
   "Source": "Backend",
   "BasePath": "_content/Backend",
   "Mode": "Default",
@@ -376,6 +376,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\images\\venues\\c0598585-0c6e-4188-8581-bda5afd3abc7.jpg"
+    },
+    {
+      "Identity": "D:\\EventBooking\\Backend\\wwwroot\\images\\venues\\d4313b3b-5e8c-41d6-bdce-6e4977d0741e.jpg",
+      "SourceId": "Backend",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\EventBooking\\Backend\\wwwroot\\",
+      "BasePath": "_content/Backend",
+      "RelativePath": "images/venues/d4313b3b-5e8c-41d6-bdce-6e4977d0741e.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\venues\\d4313b3b-5e8c-41d6-bdce-6e4977d0741e.jpg"
     },
     {
       "Identity": "D:\\EventBooking\\Backend\\wwwroot\\images\\venues\\f6e5b0a3-7147-452b-80ab-38579f463b61.jpg",
