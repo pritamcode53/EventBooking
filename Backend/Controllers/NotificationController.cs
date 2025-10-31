@@ -16,7 +16,7 @@ namespace backend.Controllers
             _notificationDAL = notificationDAL;
         }
 
-        // 🔹 Get all unread notifications for a specific user
+        // Get all unread notifications for a specific user
         [HttpGet("{userId}/unread")]
         public async Task<IActionResult> GetUnreadNotifications(int userId)
         {
@@ -34,7 +34,7 @@ namespace backend.Controllers
             }
         }
 
-        // 🔹 Get all notifications (read + unread) for a user
+        // Get all notifications (read + unread) for a user
         [HttpGet("{userId}/all")]
         public async Task<IActionResult> GetAllNotifications(int userId)
         {
@@ -52,7 +52,7 @@ namespace backend.Controllers
             }
         }
 
-        // 🔹 Mark a specific notification as read
+        // Mark a specific notification as read
         [HttpPut("read/{notificationId}")]
         public async Task<IActionResult> MarkAsRead(int notificationId)
         {
@@ -67,7 +67,7 @@ namespace backend.Controllers
             }
         }
 
-        // 🔹 (Optional) Add a manual notification for testing or admin actions
+        // (Optional) Add a manual notification for testing or admin actions
         [HttpPost("add")]
         public async Task<IActionResult> AddNotification([FromBody] NotificationCreateDto dto)
         {
@@ -86,7 +86,7 @@ namespace backend.Controllers
         }
     }
 
-    // ✅ DTO for creating new notifications manually or from admin
+    //  DTO for creating new notifications manually or from admin
     public class NotificationCreateDto
     {
         public int UserId { get; set; }
