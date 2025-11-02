@@ -83,6 +83,30 @@ namespace backend.Controllers
         }
 
 
+        [Authorize]
+        [HttpPut("update-price/{bookingId:int}")]
+        public async Task<IActionResult> UpdateBookingPrice(int bookingId, [FromBody] UpdatePriceDto dto)
+        {
+            var userId = GetUserIdFromToken();
+            if (userId == null)
+                return Unauthorized(new { Message = "User not authenticated" });
+
+            var user = await _userHelper.GetUserByIdAsync(userId.Value);
+            if (user == null || (user.Role != UserRole.Admin && user.Role != UserRole.VenueOwner))
+                return Forbid("Only Admin or Venue Owner can modify booking price.");
+
+            if (dto.NewPrice <= 0)
+                return BadRequest(new { Message = "Invalid price value." });
+
+            var success = await _customBookingHelper.UpdateBookingPriceAsync(bookingId, dto.NewPrice, dto.OwnerReview ?? string.Empty);
+
+            if (!success)
+                return NotFound(new { Message = "Booking not found." });
+
+            return Ok(new { Message = "Booking price updated successfully." });
+        }
+
+
         /// <summary>
         /// ✅ Get details of a specific custom booking request by ID
         /// </summary>
@@ -118,5 +142,26 @@ namespace backend.Controllers
 
             return Ok(new { Message = "Custom booking request deleted successfully" });
         }
+
+        [HttpPut("{requestId:int}/approve")]
+        public async Task<IActionResult> ApproveCustomBooking(int requestId, [FromBody] ApproveCustomBookingDto dto)
+        {
+            var userId = GetUserIdFromToken();
+            if (userId == null)
+                return Unauthorized(new { Message = "User not authenticated" });
+
+            var success = await _customBookingHelper.UpdateUserApprovalAsync(requestId, dto.IsApproved);
+
+            if (!success)
+                return NotFound(new { Message = "Custom booking not found or update failed." });
+
+            var message = dto.IsApproved
+                ? "✅ Custom booking approved successfully."
+                : "❌ Custom booking rejected.";
+
+            return Ok(new { Message = message });
+        }
+
+
     }
 }

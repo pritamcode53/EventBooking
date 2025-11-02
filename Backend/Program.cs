@@ -8,8 +8,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.SignalR;
 using backend.Hubs;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+
+// 👇 Add this line before building the app
+QuestPDF.Settings.License = LicenseType.Community;
 
 // ---------------------- Add Services ----------------------
 
@@ -120,8 +126,10 @@ builder.Services.AddScoped<CustomBookingDAL>();
 builder.Services.AddScoped<CustomBookingHelper>(sp =>
 {
     var customBookingDAL = sp.GetRequiredService<CustomBookingDAL>();
-    return new CustomBookingHelper(customBookingDAL);
+    var bookingDAL = sp.GetRequiredService<BookingDAL>();
+    return new CustomBookingHelper(customBookingDAL, bookingDAL);
 });
+
 
 // ---------------------- JWT Service ----------------------
 builder.Services.AddSingleton<JwtService>();

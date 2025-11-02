@@ -31,11 +31,12 @@ namespace backend.DAL
         }
 
         // ✅ Mark a specific notification as read
-        public async Task MarkAsReadAsync(int notificationId)
+        public async Task MarkAllAsReadAsync(int userId)
         {
-            string sql = @"UPDATE Notifications SET IsRead = TRUE WHERE NotificationId = @NotificationId";
-            await _connection.ExecuteAsync(sql, new { NotificationId = notificationId });
+            var query = "UPDATE Notifications SET IsRead = TRUE WHERE UserId = @UserId AND IsRead = FALSE";
+            await _connection.ExecuteAsync(query, new { UserId = userId });
         }
+
 
         // ✅ (Optional) Fetch all notifications for a user (read + unread)
         public async Task<IEnumerable<Notification>> GetAllNotificationsAsync(int userId)

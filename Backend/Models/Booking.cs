@@ -5,7 +5,7 @@ namespace backend.Models
     public class Booking
     {
         public int BookingId { get; set; }        // Primary key
-        public string? BookingCode { get; set; } 
+        public string? BookingCode { get; set; }
         public int VenueId { get; set; }          // Foreign key to Venue
         public int CustomerId { get; set; }       // Foreign key to User (Customer)
         public DateTime BookingDate { get; set; } // Date/time of the booking
@@ -26,5 +26,9 @@ namespace backend.Models
         // Navigation properties
         public Venue? Venue { get; set; }
         public User? Customer { get; set; }
+
+        // 🔽 Helper projection fields for joined data
+        public string? UserName { get; set; }
+        public string? VenueName { get; set; }
     }
 }

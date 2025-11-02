@@ -68,9 +68,9 @@ namespace backend.DAL
         }
 
         // ----------------- Cancel/Delete Booking -----------------
-      public async Task<int> CancelBookingAsync(int bookingId, int customerId, string cancelReason)
-{
-    var sql = @"
+        public async Task<int> CancelBookingAsync(int bookingId, int customerId, string cancelReason)
+        {
+            var sql = @"
         INSERT INTO cancelled_bookings (
             bookingid, venueid, customerid, bookingdate, timeduration, 
             duration_hours, duration_days, totalprice, status, createdat, 
@@ -87,30 +87,30 @@ namespace backend.DAL
         WHERE bookingid = @BookingId AND customerid = @CustomerId;
     ";
 
-    if (_db.State != ConnectionState.Open)
-        _db.Open();
+            if (_db.State != ConnectionState.Open)
+                _db.Open();
 
-    using (var transaction = _db.BeginTransaction())
-    {
-        try
-        {
-            int rowsAffected = await _db.ExecuteAsync(sql, new
+            using (var transaction = _db.BeginTransaction())
             {
-                BookingId = bookingId,
-                CustomerId = customerId,
-                CancelReason = cancelReason
-            }, transaction);
+                try
+                {
+                    int rowsAffected = await _db.ExecuteAsync(sql, new
+                    {
+                        BookingId = bookingId,
+                        CustomerId = customerId,
+                        CancelReason = cancelReason
+                    }, transaction);
 
-            transaction.Commit();
-            return rowsAffected;
+                    transaction.Commit();
+                    return rowsAffected;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
         }
-        catch
-        {
-            transaction.Rollback();
-            throw;
-        }
-    }
-}
 
 
 
@@ -146,8 +146,8 @@ namespace backend.DAL
             return bookings;
         }
         public async Task<IEnumerable<Booking>> GetApprovedBookingsByOwnerAsync(int ownerId)
-{
-    var sql = @"
+        {
+            var sql = @"
         SELECT 
     b.bookingid,
     b.venueid AS BookingVenueId,
@@ -187,27 +187,27 @@ WHERE v.ownerid = @OwnerId
 ORDER BY b.bookingdate ASC;
     ";
 
-    if (_db.State != ConnectionState.Open)
-        _db.Open();
+            if (_db.State != ConnectionState.Open)
+                _db.Open();
 
-    var bookings = await _db.QueryAsync<Booking, User, Venue, Booking>(
-        sql,
-        (b, user, venue) =>
-        {
-            b.Customer = user;
-            b.Venue = venue;
-            return b;
-        },
-        new 
-        { 
-            OwnerId = ownerId,                 // pass as int, not string
-            Status = BookingStatus.Approved.ToString() // int for enum
-        },
-        splitOn: "userid,Venue_VenueId"       // matches your SELECT aliases
-    );
+            var bookings = await _db.QueryAsync<Booking, User, Venue, Booking>(
+                sql,
+                (b, user, venue) =>
+                {
+                    b.Customer = user;
+                    b.Venue = venue;
+                    return b;
+                },
+                new
+                {
+                    OwnerId = ownerId,                 // pass as int, not string
+                    Status = BookingStatus.Approved.ToString() // int for enum
+                },
+                splitOn: "userid,Venue_VenueId"       // matches your SELECT aliases
+            );
 
-    return bookings;
-}
+            return bookings;
+        }
 
 
         // ----------------- Check if venue is available for requested date and hours -----------------
@@ -284,23 +284,51 @@ ORDER BY b.bookingdate ASC;
 
 
         // ----------------- Get Booking By Id (with enriched info for emails) -----------------
+        // public async Task<Booking?> GetBookingByIdAsync(int bookingId)
+        // {
+        //     var sql = @"
+        //         SELECT b.*, 
+        //                u.email AS CustomerEmail, 
+        //                u.name AS CustomerName, 
+        //                v.name AS VenueName
+        //         FROM bookings b
+        //         JOIN users u ON b.customerid = u.userid
+        //         JOIN venues v ON b.venueid = v.venueid
+        //         WHERE b.bookingid = @BookingId
+        //     ";
+
+        //     if (_db.State != ConnectionState.Open)
+        //         _db.Open();
+
+        //     return await _db.QueryFirstOrDefaultAsync<Booking>(sql, new { BookingId = bookingId });
+        // }
+
         public async Task<Booking?> GetBookingByIdAsync(int bookingId)
         {
-            var sql = @"
-                SELECT b.*, 
-                       u.email AS CustomerEmail, 
-                       u.name AS CustomerName, 
-                       v.name AS VenueName
-                FROM bookings b
-                JOIN users u ON b.customerid = u.userid
-                JOIN venues v ON b.venueid = v.venueid
-                WHERE b.bookingid = @BookingId
-            ";
+            const string sql = @"
+        SELECT 
+            b.bookingid AS BookingId,
+            b.customerid AS CustomerId,
+            b.venueid AS VenueId,
+            b.createdat AS CreatedAt,
+            b.totalprice AS TotalPrice,
+            b.status AS Status,
+            b.paymentstatus AS PaymentStatus,
+            b.ownerreview AS OwnerReview,
+            b.bookingcode AS BookingCode,
+            u.name AS UserName,
+            v.name AS VenueName
+        FROM bookings b
+        JOIN users u ON b.customerid = u.userid
+        JOIN venues v ON b.venueid = v.venueid
+        WHERE b.bookingid = @BookingId;
+    ";
 
             if (_db.State != ConnectionState.Open)
                 _db.Open();
 
             return await _db.QueryFirstOrDefaultAsync<Booking>(sql, new { BookingId = bookingId });
         }
+
     }
 }

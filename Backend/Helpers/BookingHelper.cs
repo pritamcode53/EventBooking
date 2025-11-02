@@ -204,5 +204,13 @@ namespace backend.Helpers
 
             return result;
         }
+
+
+        public async Task<Booking?> GetBookingByIdAsync(int bookingId)
+        {
+            return await _dal.GetBookingByIdAsync(bookingId);
+        }
+
+
     }
 }

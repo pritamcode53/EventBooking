@@ -18,23 +18,26 @@ namespace backend.DAL
         /// <summary>
         /// Create a new custom booking request
         /// </summary>
-        public async Task<int> CreateCustomBookingAsync(int userId, int type, string requirements)
+        public async Task<int> CreateCustomBookingAsync(int userId, int bookingId, string requirements)
         {
-            var sql = @"
-                INSERT INTO custom_booking_requests (user_id, type, requirements)
-                VALUES (@UserId, @Type, @Requirements)
-                RETURNING request_id;
-            ";
+            const string sql = @"
+        INSERT INTO custom_booking_requests (user_id, booking_id, requirements, created_at)
+        VALUES (@UserId, @BookingId, @Requirements, NOW())
+        RETURNING request_id;
+    ";
 
-            if (_db.State != ConnectionState.Open) _db.Open();
+
 
             return await _db.ExecuteScalarAsync<int>(sql, new
             {
                 UserId = userId,
-                Type = type,
+                BookingId = bookingId,
                 Requirements = requirements
             });
+
         }
+
+
 
         /// <summary>
         /// Get all custom booking requests created by a specific user
@@ -45,7 +48,6 @@ namespace backend.DAL
                 SELECT 
                     request_id AS RequestId,
                     user_id AS UserId,
-                    type AS Type,
                     requirements AS Requirements,
                     created_at AS CreatedAt
                 FROM custom_booking_requests
@@ -67,7 +69,6 @@ namespace backend.DAL
                 SELECT 
                     request_id AS RequestId,
                     user_id AS UserId,
-                    type AS Type,
                     requirements AS Requirements,
                     created_at AS CreatedAt
                 FROM custom_booking_requests
@@ -104,7 +105,6 @@ namespace backend.DAL
                 SELECT 
                     request_id AS RequestId,
                     user_id AS UserId,
-                    type AS Type,
                     requirements AS Requirements,
                     created_at AS CreatedAt
                 FROM custom_booking_requests
@@ -115,5 +115,54 @@ namespace backend.DAL
 
             return await _db.QueryAsync<CustomBookingRequest>(sql);
         }
+
+        public async Task<bool> UpdateBookingPriceAsync(int bookingId, decimal newPrice, string ownerReview)
+        {
+            var query = @"
+                UPDATE bookings 
+                SET customnewprice = @NewPrice, ownerreview = @OwnerReview
+                WHERE bookingid = @BookingId;
+            ";
+
+            var rows = await _db.ExecuteAsync(query, new
+            {
+                BookingId = bookingId,
+                NewPrice = newPrice,
+                OwnerReview = ownerReview
+            });
+
+            return rows > 0;
+        }
+
+        public async Task<bool> UpdateUserApprovalAsync(int requestId, bool isApproved)
+        {
+            // Step 1: Get booking_id from the custom_booking_requests table
+            var bookingIdQuery = "SELECT booking_id FROM custom_booking_requests WHERE request_id = @RequestId";
+            var bookingId = await _db.ExecuteScalarAsync<int?>(bookingIdQuery, new { RequestId = requestId });
+
+            if (bookingId == null)
+                return false; // No matching booking
+
+            // Step 2: Update user approval status
+            var status = isApproved ? true : false;
+            var sql = "UPDATE bookings SET isuserapproved = @Status WHERE bookingid = @BookingId";
+            var rows = await _db.ExecuteAsync(sql, new { BookingId = bookingId, Status = status });
+
+            // Step 3: If user approved, adjust the total price
+            if (isApproved)
+            {
+                var updateBookingSql = @"
+            UPDATE bookings 
+            SET totalprice = totalprice + COALESCE(customnewprice, 0)
+            WHERE bookingid = @BookingId;
+        ";
+                await _db.ExecuteAsync(updateBookingSql, new { BookingId = bookingId });
+            }
+
+            return rows > 0;
+        }
+
+
+
     }
 }

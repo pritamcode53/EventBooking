@@ -52,18 +52,32 @@ namespace backend.Controllers
             }
         }
 
-        // Mark a specific notification as read
-        [HttpPut("read/{notificationId}")]
-        public async Task<IActionResult> MarkAsRead(int notificationId)
+        // // Mark a specific notification as read
+        // [HttpPut("read/{notificationId}")]
+        // public async Task<IActionResult> MarkAsRead(int notificationId)
+        // {
+        //     try
+        //     {
+        //         await _notificationDAL.MarkAsReadAsync(notificationId);
+        //         return Ok(new { message = "Notification marked as read." });
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return StatusCode(500, new { message = "An error occurred while updating notification.", error = ex.Message });
+        //     }
+        // }
+
+        [HttpPut("read/all/{userId}")]
+        public async Task<IActionResult> MarkAllAsRead(int userId)
         {
             try
             {
-                await _notificationDAL.MarkAsReadAsync(notificationId);
-                return Ok(new { message = "Notification marked as read." });
+                await _notificationDAL.MarkAllAsReadAsync(userId);
+                return Ok(new { message = "All notifications marked as read." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while updating notification.", error = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while updating notifications.", error = ex.Message });
             }
         }
 

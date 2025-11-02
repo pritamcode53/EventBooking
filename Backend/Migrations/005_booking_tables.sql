@@ -16,3 +16,5 @@ CREATE TABLE IF NOT EXISTS bookings (
     paidamount NUMERIC(10,2) DEFAULT 0.00,
     dueamount NUMERIC(10,2) GENERATED ALWAYS AS (totalprice - paidamount) STORED
 );
+
+

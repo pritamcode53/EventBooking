@@ -57,4 +57,19 @@ namespace backend.DTOs
         public decimal PaidAmount { get; set; } = 0.00m;
         public decimal DueAmount { get; set; } = 0.00m;
     }
+
+
+    public class BookingInvoiceDto
+    {
+        public int BookingId { get; set; }
+        public string? BookingCode { get; set; }
+        public string? UserName { get; set; }
+        public string? VenueName { get; set; }
+        public decimal TotalPrice { get; set; }
+        public string? Status { get; set; }
+        public string? PaymentStatus { get; set; }
+        public string? OwnerReview { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+
 }

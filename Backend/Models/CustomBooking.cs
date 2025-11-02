@@ -9,6 +9,8 @@ namespace backend.Models
         public int UserId { get; set; }
         public PricingType Type { get; set; }
         public string Requirements { get; set; } = string.Empty;
+        public decimal? NewPrice { get; set; }  // added
+        public string? OwnerReview { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using QuestPDF.Helpers;
+using QuestPDF.Fluent;
 
 namespace backend.Controllers
 {
@@ -55,27 +57,27 @@ namespace backend.Controllers
         // ---------------- Customer APIs ----------------
         [Authorize]
         [HttpPost("create")]
-public async Task<IActionResult> CreateBooking([FromBody] BookingCreateDto dto)
-{
-    var userId = GetUserIdFromToken();
-    if (userId == null)
-        return Unauthorized(new { Message = "User not authorized" });
-
-    try
-    {
-        var bookingId = await _helper.CreateBookingAsync(dto, userId.Value);
-        return Ok(new
+        public async Task<IActionResult> CreateBooking([FromBody] BookingCreateDto dto)
         {
-            BookingId = bookingId,
-            Message = "Booking request created successfully"
-        });
-    }
-    catch (Exception ex)
-    {
-        // Here you catch "Venue not found", "Venue not available", etc.
-        return BadRequest(new { Message = ex.Message });
-    }
-}
+            var userId = GetUserIdFromToken();
+            if (userId == null)
+                return Unauthorized(new { Message = "User not authorized" });
+
+            try
+            {
+                var bookingId = await _helper.CreateBookingAsync(dto, userId.Value);
+                return Ok(new
+                {
+                    BookingId = bookingId,
+                    Message = "Booking request created successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                // Here you catch "Venue not found", "Venue not available", etc.
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
 
 
         [Authorize]
@@ -217,6 +219,76 @@ public async Task<IActionResult> CreateBooking([FromBody] BookingCreateDto dto)
         // }
 
 
+
+        [Authorize]
+        [HttpGet("{bookingId}/invoice")]
+        [Obsolete]
+
+        public async Task<IActionResult> GetInvoice(int bookingId)
+        {
+            var userId = GetUserIdFromToken();
+            if (userId == null)
+                return Unauthorized(new { Message = "User not authenticated" });
+
+            // Fetch booking
+            var booking = await _helper.GetBookingByIdAsync(bookingId);
+            if (booking == null)
+                return NotFound(new { Message = "Booking not found" });
+            Console.WriteLine($"🔍 Checking access: booking.CustomerId={booking.CustomerId}, userId={userId}");
+            // Ensure user is owner of this booking
+            if (booking.CustomerId != userId)
+                return StatusCode(403, new { Message = "You are not authorized to view this invoice." });
+            // Generate Invoice PDF
+            var pdf = GenerateInvoicePdf(booking);
+
+            // Return PDF as File
+            var fileName = $"Invoice_{booking.BookingCode}.pdf";
+            return File(pdf, "application/pdf", fileName);
+        }
+
+        [Obsolete]
+        private byte[] GenerateInvoicePdf(Booking booking)
+        {
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Margin(40);
+                    page.Size(PageSizes.A4);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(12));
+
+                    page.Header().Row(row =>
+                    {
+                        row.RelativeColumn().Text($"INVOICE #{booking.BookingCode}")
+                            .SemiBold().FontSize(20).FontColor(Colors.Blue.Medium);
+
+                        row.ConstantColumn(150)
+                           .AlignRight()
+                           .Text($"Date: {booking.CreatedAt:yyyy-MM-dd}")
+                           .FontSize(12);
+                    });
+
+                    page.Content().PaddingVertical(15).Column(col =>
+                    {
+                        col.Spacing(8);
+
+                        col.Item().Text($"Customer Name: {booking.UserName ?? "N/A"}");
+                        col.Item().Text($"Venue: {booking.VenueName ?? "N/A"}");
+                        col.Item().Text($"Status: {booking.Status}");
+                        col.Item().Text($"Payment: {booking.PaymentStatus ?? "N/A"}");
+                        col.Item().Text($"Total Price: ₹{booking.TotalPrice:F2}");
+                        col.Item().Text($"Paid Amount: ₹{booking.PaidAmount:F2}");
+                        col.Item().Text($"Due Amount: ₹{booking.DueAmount:F2}");
+
+                    });
+
+                    page.Footer().AlignCenter().Text("Thank you for booking with EventBooking!").FontSize(10);
+                });
+            });
+
+            return document.GeneratePdf();
+        }
 
     }
 }

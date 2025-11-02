@@ -35,17 +35,47 @@ const DashboardHeader = () => {
     fetchProfile();
   }, [navigate]);
 
-  // ✅ SignalR connection setup
+  // ✅ Fetch all notifications (previous + unread)
+  const fetchAllNotifications = async (userId) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5232/api/notification/${userId}/all`
+      );
+      if (Array.isArray(res.data)) {
+        setNotifications(res.data);
+        const unread = res.data.filter((n) => !n.isRead);
+        setUnreadCount(unread.length);
+      }
+    } catch (err) {
+      console.error("Error fetching all notifications:", err);
+    }
+  };
+
+  // ✅ Fetch only unread notifications
+  const fetchUnreadNotifications = async (uid) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5232/api/notification/${userId}/unread`
+      );
+      if (Array.isArray(res.data)) {
+        setUnreadCount(res.data.length);
+      }
+    } catch (err) {
+      console.error("Error fetching unread notifications:", err);
+    }
+  };
+
+  // ✅ SignalR connection setup (real-time)
   useEffect(() => {
     if (!userId) return;
-    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
     const connectSignalR = async () => {
       try {
         const connection = new HubConnectionBuilder()
-          .withUrl(`http://localhost:5232/hubs/notifications?userId=${userId}`, {
-            withCredentials: true,
-          })
+          .withUrl(
+            `http://localhost:5232/hubs/notifications?userId=${userId}`,
+            { withCredentials: true }
+          )
           .withAutomaticReconnect()
           .build();
 
@@ -53,14 +83,14 @@ const DashboardHeader = () => {
         await connection.start();
         console.log("✅ Connected to Notification Hub");
 
+        // when new notification arrives
         connection.on("ReceiveNotification", (message) => {
-          const newNote = { message, timestamp: Date.now() };
-          const stored = JSON.parse(localStorage.getItem("notifications")) || [];
-          const updated = [newNote, ...stored].filter(
-            (n) => Date.now() - n.timestamp < SEVEN_DAYS_MS
-          );
-          localStorage.setItem("notifications", JSON.stringify(updated));
-          setNotifications(updated.map((n) => n.message));
+          const newNote = {
+            message,
+            timestamp: Date.now(),
+            isRead: false,
+          };
+          setNotifications((prev) => [newNote, ...prev]);
           setUnreadCount((prev) => prev + 1);
         });
       } catch (err) {
@@ -70,6 +100,20 @@ const DashboardHeader = () => {
 
     connectSignalR();
     return () => connectionRef.current?.stop();
+  }, [userId]);
+
+  // ✅ Initial + periodic fetch
+  useEffect(() => {
+    if (!userId) return;
+
+    fetchAllNotifications(userId);
+    fetchUnreadNotifications(userId);
+
+    const interval = setInterval(() => {
+      fetchUnreadNotifications(userId);
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, [userId]);
 
   const handleLogout = async () => {
@@ -96,7 +140,7 @@ const DashboardHeader = () => {
         <div className="hidden md:flex items-center gap-6 relative">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 text-gray-700 hover:text-blue-600 font-medium transition"
+            className="flex items-center gap-2 text-gray-700 hover:text-green-600 font-medium transition"
           >
             <Home size={18} /> Home
           </button>
@@ -105,6 +149,7 @@ const DashboardHeader = () => {
             notifications={notifications}
             unreadCount={unreadCount}
             setUnreadCount={setUnreadCount}
+            userId={userId}
           />
 
           <span className="font-medium text-gray-700">
@@ -125,6 +170,7 @@ const DashboardHeader = () => {
             notifications={notifications}
             unreadCount={unreadCount}
             setUnreadCount={setUnreadCount}
+            userId={userId}
           />
           <button onClick={() => setMenuOpen(!menuOpen)}>
             <Menu size={28} />
