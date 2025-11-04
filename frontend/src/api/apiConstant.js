@@ -16,7 +16,8 @@ export const CANCEL_BOOKING = (bookingId) =>
   `${BASE_URL}/booking/${bookingId}/cancel`;
 // Booking endpoints
 export const MY_BOOKINGS = `${BASE_URL}/booking/mybookings`;
-
+export const GIVE_REVIEW = `${BASE_URL}/review/add`;
+export const GET_INVOICE = (bookingId) => `${BASE_URL}/booking/${bookingId}/invoice`;
 // Venue Owner 
 export const VENUE_BOOKINGS = `${BASE_URL}/booking/owner/bookings/pending`; // Get all pending bookings
 export const UPDATE_BOOKING_STATUS = (bookingId) =>
@@ -58,3 +59,30 @@ export const ADMIN_TOTAL_COST = `${ADMIN_BASE}/analytics/total-cost`;
 export const ADMIN_TOTAL_DUE = `${ADMIN_BASE}/analytics/total-due`;
 export const ADMIN_GET_CANCEL = `${ADMIN_BASE}/analytics/cancel`;
 export const ADMIN_GET_CANCEL_DETAILS = `${ADMIN_BASE}/details-cancel`;
+
+
+// Notification endpoints live and dbs
+export const LIVE_HUB_API = (userId) => `http://localhost:5232/hubs/notifications?userId=${userId}`;
+export const GET_UNREAD_NOTIFICATIONS = (userId) => `${BASE_URL}/notification/${userId}/unread`;
+export const GET_ALL_NOTFICIATIONS = (userId) => `${BASE_URL}/notification/${userId}/all`;
+
+
+//  ===========================
+
+//  CUSTOM NOTIFICATION 
+
+//  ===========================
+
+export const POST_CREATE_CN = `${BASE_URL}/custombooking/create`;
+export const GET_MY_RQ_CN = `${BASE_URL}/custombooking/my-requests`;
+export const GET_SPECIFIC_REQUEST = (requestId) => `${BASE_URL}/custombooking/${requestId}`;
+export const PUT_UPDATED_RQ_CN = (requestId)=> `${BASE_URL}/custombooking/${requestId}/approve`;
+export const GET_CUSTOM_REQUEST_BY_ID = (requestId) =>
+  `${BASE_URL}/custombooking/${requestId}`;
+
+
+
+// =========== admin side ===========
+export const GET_ALL_RQ_CN = `${BASE_URL}/custombooking/all-requests`;
+export const PUT_UPDATE_RQ_CN = (bookingId)=> `${BASE_URL}/custombooking/update-price/${bookingId}`;
+

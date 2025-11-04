@@ -17,6 +17,10 @@ namespace backend.DAL
         // ----------------- Create Booking -----------------
         public async Task<int> AddBookingAsync(Booking booking)
         {
+             if (booking.TimeDuration == PricingType.PerEvent) // assuming enum name
+    {
+        booking.DurationHours = 24;
+    }
             var parameters = new
             {
                 booking.VenueId,
@@ -211,21 +215,26 @@ ORDER BY b.bookingdate ASC;
 
 
         // ----------------- Check if venue is available for requested date and hours -----------------
-        public async Task<bool> IsVenueAvailableAsync(int venueId, DateTime date, int hours)
-        {
-            var sql = @"
-                SELECT COUNT(1)
-                FROM bookings
-                WHERE venueid=@VenueId
-                  AND status IN ('Pending','Approved')
-                  AND @Date < bookingdate + (@Hours || ' hours')::interval
-                  AND bookingdate < @Date + (@Hours || ' hours')::interval
-            ";
+       public async Task<bool> IsVenueAvailableAsync(int venueId, DateTime date, int hours)
+{
+    var sql = @"
+        SELECT COUNT(1)
+        FROM bookings
+        WHERE venueid = @VenueId
+          AND status IN ('Pending','Approved')
+          AND (
+              @Date < bookingdate + (duration_hours || ' hours')::interval
+              AND bookingdate < @Date + (@Hours || ' hours')::interval
+          )
+    ";
 
-            if (_db.State != ConnectionState.Open) _db.Open();
-            var count = await _db.ExecuteScalarAsync<int>(sql, new { VenueId = venueId, Date = date, Hours = hours });
-            return count == 0; // True if available
-        }
+    if (_db.State != ConnectionState.Open) 
+        _db.Open();
+
+    var count = await _db.ExecuteScalarAsync<int>(sql, new { VenueId = venueId, Date = date, Hours = hours });
+    return count == 0; // true if no overlap
+}
+
 
         // ----------------- Approve/Reject Booking (Venue Owner) -----------------
         public async Task<int> UpdateBookingStatusByOwnerAsync(int bookingId, int ownerId, BookingStatus status)

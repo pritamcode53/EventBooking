@@ -16,6 +16,7 @@ import CancelledBookings from "../CancelledBooking";
 import RefundManagement from "./Booking/RefundManagement";
 import BookingCalendar from "./Booking/BookingCalendar";
 import { APPROVED_VENUE } from "../../api/apiConstant";
+import AllRequestsTable from "./Booking/AllRequestsTable";
 
 const VenueOwnerDashboard = () => {
   const [activeTab, setActiveTab] = useState("Venues");
@@ -27,6 +28,7 @@ const VenueOwnerDashboard = () => {
     { name: "Approved", icon: <Users size={18} /> },
     { name: "Cancelled Bookings", icon: <XCircle size={18} /> },
     { name: "Refund Management", icon: <DollarSign size={18} /> },
+    { name: "Custom Booking Requests", icon: <Users size={18} /> },
     { name: "Calendar", icon: <Calendar size={18} /> },
   ];
 
@@ -44,6 +46,8 @@ const VenueOwnerDashboard = () => {
         return <RefundManagement />;
       case "Calendar":
         return <BookingCalendar apiUrl={APPROVED_VENUE} />;
+      case "Custom Booking Requests":
+        return <AllRequestsTable />
       default:
         return null;
     }

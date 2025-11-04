@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { GIVE_REVIEW } from "../../api/apiConstant";
 
 const ReviewModal = ({ data, onClose, refresh }) => {
   const [reviewData, setReviewData] = useState({
@@ -18,7 +19,7 @@ const ReviewModal = ({ data, onClose, refresh }) => {
     if (reviewData.image) formData.append("Image", reviewData.image);
 
     try {
-      await axios.post("http://localhost:5232/api/review/add", formData, {
+      await axios.post(GIVE_REVIEW, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { LogOut, Menu, Home } from "lucide-react";
 import axios from "axios";
-import { USER_LOGOUT, USER_PROFILE } from "../api/apiConstant";
+import { USER_LOGOUT, USER_PROFILE , LIVE_HUB_API , GET_UNREAD_NOTIFICATIONS ,GET_ALL_NOTFICIATIONS} from "../api/apiConstant";
 import { useNavigate } from "react-router-dom";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import NotificationBell from "./NotificationBell";
@@ -39,7 +39,7 @@ const DashboardHeader = () => {
   const fetchAllNotifications = async (userId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5232/api/notification/${userId}/all`
+        GET_ALL_NOTFICIATIONS(userId)
       );
       if (Array.isArray(res.data)) {
         setNotifications(res.data);
@@ -55,7 +55,7 @@ const DashboardHeader = () => {
   const fetchUnreadNotifications = async (uid) => {
     try {
       const res = await axios.get(
-        `http://localhost:5232/api/notification/${userId}/unread`
+        GET_UNREAD_NOTIFICATIONS(userId)
       );
       if (Array.isArray(res.data)) {
         setUnreadCount(res.data.length);
@@ -73,7 +73,7 @@ const DashboardHeader = () => {
       try {
         const connection = new HubConnectionBuilder()
           .withUrl(
-            `http://localhost:5232/hubs/notifications?userId=${userId}`,
+            LIVE_HUB_API(userId),
             { withCredentials: true }
           )
           .withAutomaticReconnect()

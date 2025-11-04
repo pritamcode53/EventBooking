@@ -22,16 +22,29 @@ const BookingCalendar = ({ apiUrl }) => {
 
         const formattedBookings = data.map((b) => {
           const start = moment(b.bookingDate);
-          const end =
-            b.timeDuration === "PerDay"
-              ? moment(b.bookingDate).add(b.durationDays, "days")
-              : moment(b.bookingDate).add(b.durationHours, "hours");
+          let end;
+
+          // ✅ Handle different time durations
+          if (b.timeDuration === "PerDay") {
+            end = moment(b.bookingDate).add(b.durationDays, "days");
+          } else if (b.timeDuration === "PerEvent") {
+            // 🔹 PerEvent: Full-day (24 hours)
+            end = moment(b.bookingDate).add(1, "days");
+          } else if (b.timeDuration === "Custom") {
+            if (b.durationDays && b.durationDays > 0)
+              end = moment(b.bookingDate).add(b.durationDays, "days");
+            else
+              end = moment(b.bookingDate).add(b.durationHours || 1, "hours");
+          } else {
+            end = moment(b.bookingDate).add(b.durationHours || 1, "hours");
+          }
 
           return {
             title: `${b.venue.name} - ${b.status}`,
             start: start.toDate(),
             end: end.toDate(),
-            allDay: b.timeDuration === "PerDay",
+            allDay:
+              b.timeDuration === "PerDay" || b.timeDuration === "PerEvent",
             resource: b,
           };
         });
@@ -45,12 +58,12 @@ const BookingCalendar = ({ apiUrl }) => {
     fetchBookings();
   }, [apiUrl]);
 
-  // ✅ Styling for events
+  // ✅ Event styling
   const eventStyleGetter = (event) => {
     const backgroundColor =
       event.resource.status === "Approved"
-        ? "rgba(46, 204, 113, 0.8)"
-        : "rgba(231, 76, 60, 0.8)";
+        ? "rgba(46, 204, 113, 0.85)" // green
+        : "rgba(231, 76, 60, 0.85)"; // red
 
     return {
       style: {
@@ -67,7 +80,7 @@ const BookingCalendar = ({ apiUrl }) => {
 
   const closeModal = () => setSelectedEvent(null);
 
-  // ✅ Navigation Handlers
+  // ✅ Navigation
   const handleNavigate = (direction) => {
     if (direction === "TODAY") setCurrentDate(new Date());
     else if (direction === "NEXT")
@@ -84,7 +97,6 @@ const BookingCalendar = ({ apiUrl }) => {
     <div className="relative p-3 sm:p-4 bg-white rounded-2xl shadow-lg">
       {/* 🔹 Custom Toolbar */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
-        {/* Left: Back, Today, Next */}
         <div className="flex gap-2">
           <button
             onClick={() => handleNavigate("BACK")}
@@ -106,12 +118,10 @@ const BookingCalendar = ({ apiUrl }) => {
           </button>
         </div>
 
-        {/* Middle: Current Month/Year */}
         <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
           {moment(currentDate).format("MMMM YYYY")}
         </h2>
 
-        {/* Right: View Buttons */}
         <div className="flex gap-2">
           {["month", "week", "day"].map((v) => (
             <button
@@ -186,6 +196,8 @@ const BookingCalendar = ({ apiUrl }) => {
                 <strong>Duration:</strong>{" "}
                 {selectedEvent.resource.timeDuration === "PerDay"
                   ? `${selectedEvent.resource.durationDays} day(s)`
+                  : selectedEvent.resource.timeDuration === "PerEvent"
+                  ? "Full Event (24 hrs)"
                   : `${selectedEvent.resource.durationHours} hour(s)`}
               </p>
               <p>

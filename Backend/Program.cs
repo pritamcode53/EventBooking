@@ -123,12 +123,20 @@ builder.Services.AddScoped<RefundHelper>(sp =>
 
 // Custom Booking
 builder.Services.AddScoped<CustomBookingDAL>();
+builder.Services.AddScoped<VenueDAL>();
+builder.Services.AddScoped<NotificationDAL>();
+
 builder.Services.AddScoped<CustomBookingHelper>(sp =>
 {
     var customBookingDAL = sp.GetRequiredService<CustomBookingDAL>();
     var bookingDAL = sp.GetRequiredService<BookingDAL>();
-    return new CustomBookingHelper(customBookingDAL, bookingDAL);
+    var venueDAL = sp.GetRequiredService<VenueDAL>();
+    var notificationDAL = sp.GetRequiredService<NotificationDAL>();
+    var hubContext = sp.GetRequiredService<IHubContext<NotificationHub>>();
+
+    return new CustomBookingHelper(customBookingDAL, bookingDAL, venueDAL, notificationDAL, hubContext);
 });
+
 
 
 // ---------------------- JWT Service ----------------------

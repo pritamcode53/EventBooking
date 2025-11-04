@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Controllers
 {
     [ApiController]
-    [Route("api/custom-bookings")]
+    [Route("api/custombooking")]
     [Authorize] // Require authentication
     public class CustomBookingController : ControllerBase
     {
@@ -110,14 +110,14 @@ namespace backend.Controllers
         /// <summary>
         /// ✅ Get details of a specific custom booking request by ID
         /// </summary>
-        [HttpGet("{requestId:int}")]
-        public async Task<IActionResult> GetCustomBookingById(int requestId)
+        [HttpGet("{bookingId:int}")]
+        public async Task<IActionResult> GetCustomBookingById(int bookingId)
         {
             var userId = GetUserIdFromToken();
             if (userId == null)
                 return Unauthorized(new { Message = "User not authenticated" });
 
-            var booking = await _customBookingHelper.GetCustomBookingByIdAsync(requestId);
+            var booking = await _customBookingHelper.GetCustomBookingByIdAsync(bookingId);
             if (booking == null)
                 return NotFound(new { Message = "Custom booking request not found" });
 

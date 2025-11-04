@@ -63,22 +63,29 @@ namespace backend.DAL
         /// <summary>
         /// Get a single custom booking request by ID
         /// </summary>
-        public async Task<CustomBookingRequest?> GetCustomBookingByIdAsync(int requestId)
-        {
-            var sql = @"
-                SELECT 
-                    request_id AS RequestId,
-                    user_id AS UserId,
-                    requirements AS Requirements,
-                    created_at AS CreatedAt
-                FROM custom_booking_requests
-                WHERE request_id = @RequestId;
-            ";
+      public async Task<CustomBookingRequest?> GetCustomBookingByIdAsync(int bookingId)
+{
+    var sql = @"
+        SELECT 
+            cbr.request_id AS RequestId,
+            cbr.user_id AS UserId,
+            cbr.booking_id AS BookingId,
+            b.timeDuration AS Type,
+            cbr.requirements AS Requirements,
+            b.customnewprice AS NewPrice,
+            b.ownerreview AS OwnerReview,
+            cbr.created_at AS CreatedAt
+        FROM custom_booking_requests cbr
+        LEFT JOIN bookings b ON b.bookingid = cbr.booking_id
+        WHERE cbr.booking_id = @BookingId;
+    ";
 
-            if (_db.State != ConnectionState.Open) _db.Open();
+    if (_db.State != ConnectionState.Open) _db.Open();
 
-            return await _db.QueryFirstOrDefaultAsync<CustomBookingRequest>(sql, new { RequestId = requestId });
-        }
+    return await _db.QueryFirstOrDefaultAsync<CustomBookingRequest>(sql, new { BookingId = bookingId });
+}
+
+
 
         /// <summary>
         /// Delete a custom booking request by user
@@ -99,22 +106,27 @@ namespace backend.DAL
         /// <summary>
         /// Get all custom booking requests (for admin)
         /// </summary>
-        public async Task<IEnumerable<CustomBookingRequest>> GetAllCustomBookingsAsync()
-        {
-            var sql = @"
-                SELECT 
-                    request_id AS RequestId,
-                    user_id AS UserId,
-                    requirements AS Requirements,
-                    created_at AS CreatedAt
-                FROM custom_booking_requests
-                ORDER BY created_at DESC;
-            ";
+       public async Task<IEnumerable<CustomBookingRequest>> GetAllCustomBookingsAsync()
+{
+    var sql = @"
+        SELECT 
+            cbr.request_id AS RequestId,
+            cbr.user_id AS UserId,
+            cbr.requirements AS Requirements,
+            cbr.created_at AS CreatedAt,
+            b.bookingid AS BookingId,
+            b.totalprice AS Price,
+            b.customnewprice As NewPrice,
+            b.ownerreview AS OwnerReview
+        FROM custom_booking_requests cbr
+        LEFT JOIN bookings b ON b.bookingid = cbr.booking_id
+        ORDER BY cbr.created_at DESC;
+    ";
 
-            if (_db.State != ConnectionState.Open) _db.Open();
+    if (_db.State != ConnectionState.Open) _db.Open();
+    return await _db.QueryAsync<CustomBookingRequest>(sql);
+}
 
-            return await _db.QueryAsync<CustomBookingRequest>(sql);
-        }
 
         public async Task<bool> UpdateBookingPriceAsync(int bookingId, decimal newPrice, string ownerReview)
         {

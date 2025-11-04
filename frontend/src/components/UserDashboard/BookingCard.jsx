@@ -1,90 +1,128 @@
-import React from "react";
-import { CreditCard, MessageSquare, XCircle } from "lucide-react";
+import React, { useState } from "react";
+import BookingDetailsModal from "./BookingDetailsModal";
+import { CreditCard, MessageSquare, XCircle, Eye } from "lucide-react";
 
 const BookingCard = ({ booking, onCancel, onReview, onPayment }) => {
+  const [showModal, setShowModal] = useState(false);
+
+  const renderDuration = () => {
+    if (booking.timeDuration === "PerHour") return `(${booking.durationHours} hr)`;
+    if (booking.timeDuration === "PerDay")
+      return `(${booking.durationDays} day${booking.durationDays > 1 ? "s" : ""})`;
+    if (booking.timeDuration === "PerEvent") return "(Full Day - 24 hr)";
+    if (booking.timeDuration === "Custom")
+      return booking.durationHours
+        ? `(${booking.durationHours} hr custom)`
+        : booking.durationDays
+        ? `(${booking.durationDays} day custom)`
+        : "(Custom Duration)";
+    return "";
+  };
+
+  const isFullyPaid = booking.paidAmount >= booking.totalPrice;
+  const isPartiallyPaid =
+    booking.paidAmount > 0 && booking.paidAmount < booking.totalPrice;
+
   return (
-    <div className="bg-white shadow-lg rounded-2xl p-5 hover:shadow-2xl transition-all duration-300 flex flex-col">
-      <h2 className="text-xl font-semibold mb-2 text-blue-700">
-        {booking.venue.name}
-      </h2>
-      <p className="text-gray-600 text-sm mb-1">📍 {booking.venue.location}</p>
-      <p className="text-gray-600 text-sm mb-1">
-        📅 {new Date(booking.bookingDate).toLocaleString()}
-      </p>
-      <p className="text-gray-600 text-sm mb-1">
-        ⏱ Duration: {booking.timeDuration}{" "}
-        {booking.timeDuration === "PerHour"
-          ? `(${booking.durationHours} hr)`
-          : booking.timeDuration === "PerDay"
-          ? `(${booking.durationDays} day)`
-          : ""}
-      </p>
-      <p className="text-gray-700 font-semibold mb-2">
-        💰 ₹{booking.totalPrice.toLocaleString()}
-      </p>
+    <>
+      <tr className="border-b hover:bg-gray-50 transition text-sm">
+        <td className="px-4 py-3 font-medium text-gray-800">
+          {booking.venue?.name}
+        </td>
+        <td className="px-4 py-3 text-gray-600">{booking.venue?.location}</td>
+        <td className="px-4 py-3 text-gray-600">
+          {new Date(booking.bookingDate).toLocaleDateString()}
+        </td>
+        <td className="px-4 py-3 text-gray-600">
+          {booking.timeDuration} {renderDuration()}
+        </td>
+        <td className="px-4 py-3 font-semibold text-gray-800">
+          ₹{booking.totalPrice.toLocaleString()}
+        </td>
 
-      <p
-        className={`font-semibold mb-3 px-3 py-1 rounded-full text-center text-sm ${
-          booking.status === "Pending"
-            ? "bg-yellow-100 text-yellow-700"
-            : booking.status === "Approved"
-            ? "bg-green-100 text-green-700"
-            : "bg-red-100 text-red-700"
-        }`}
-      >
-        {booking.status}
-      </p>
-
-      {booking.status === "Pending" && (
-        <>
-          <button
-            onClick={onCancel}
-            className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-medium py-2 rounded-lg transition-all mb-2"
+        <td className="px-4 py-3">
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+              booking.status === "Pending"
+                ? "bg-yellow-100 text-yellow-700"
+                : booking.status === "Approved"
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
+            }`}
           >
-            <XCircle className="w-5 h-5" />
-            Cancel Booking
+            {booking.status}
+          </span>
+        </td>
+
+        <td className="px-4 py-3 text-center">
+          {isFullyPaid ? (
+            <span className="text-green-600 font-semibold">Paid</span>
+          ) : isPartiallyPaid ? (
+            <span className="text-yellow-600 font-medium">
+              ₹{booking.paidAmount} / ₹{booking.totalPrice}
+            </span>
+          ) : (
+            <span className="text-gray-500">Not Paid</span>
+          )}
+        </td>
+
+        <td className="px-4 py-3 flex items-center justify-center gap-2 flex-wrap">
+          {/* View Details Button */}
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-1 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs px-3 py-1 rounded-lg transition"
+          >
+            <Eye className="w-4 h-4" /> View
           </button>
 
-          {booking.isPaid ? (
-  <button
-    disabled
-    className="bg-gray-300 cursor-not-allowed text-gray-700 font-medium py-2 rounded-lg transition mb-2"
-  >
-    Paid
-  </button>
-) : booking.amountPaid > 0 && booking.amountPaid < booking.totalPrice ? (
-  <>
-    <button
-      disabled
-      className="bg-yellow-400 cursor-not-allowed text-white font-medium py-2 rounded-lg transition mb-2 w-full"
-    >
-      Partially Paid (₹{booking.amountPaid})
-    </button>
-    <p className="text-xs text-gray-500 italic text-center mt-1">
-      Next payment should be done from the Owner side. Contact the venue owner.
-    </p>
-  </>
-) : (
-  <button
-    onClick={onPayment}
-    className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded-lg transition mb-2"
-  >
-    <CreditCard className="w-5 h-5" />
-    Pay Now
-  </button>
-)}
+          {/* Cancel Button */}
+          {booking.status === "Pending" && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onCancel();
+              }}
+              className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded-lg transition"
+            >
+              <XCircle className="w-4 h-4" /> Cancel
+            </button>
+          )}
 
-        </>
+          {/* Payment Button */}
+          {(booking.status === "Pending" || booking.status === "Approved") &&
+            !isFullyPaid && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPayment();
+                }}
+                className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded-lg transition"
+              >
+                <CreditCard className="w-4 h-4" /> Pay
+              </button>
+            )}
+
+          {/* Review Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onReview();
+            }}
+            className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded-lg transition"
+          >
+            <MessageSquare className="w-4 h-4" /> Review
+          </button>
+        </td>
+      </tr>
+
+      {/* Booking Details Modal */}
+      {showModal && (
+        <BookingDetailsModal
+          booking={booking}
+          onClose={() => setShowModal(false)}
+        />
       )}
-
-      <button
-        onClick={onReview}
-        className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 rounded-lg transition"
-      >
-        <MessageSquare className="w-5 h-5" />
-        Give Review
-      </button>
-    </div>
+    </>
   );
 };
 

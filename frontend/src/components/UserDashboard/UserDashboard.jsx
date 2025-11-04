@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { MY_BOOKINGS } from "../../api/apiConstant";
-import BookingCard from "./BookingCard";
-import ReviewModal from "./ReviewModal";
-import CancelModal from "./CancelModal";
-import PaymentModal from "./PaymentModal";
+import BookingDetailsModal from "./BookingDetailsModal";
+import { toast } from "react-toastify";
 
 const UserDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-  const [reviewData, setReviewData] = useState({});
-  const [cancelData, setCancelData] = useState({});
-  const [paymentData, setPaymentData] = useState({});
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   const fetchBookings = async () => {
     try {
@@ -23,7 +17,7 @@ const UserDashboard = () => {
       setBookings(res.data);
     } catch (error) {
       console.error(error);
-      alert("Error fetching bookings");
+      toast.error("Error fetching bookings");
     } finally {
       setLoading(false);
     }
@@ -47,60 +41,104 @@ const UserDashboard = () => {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-800 mb-2">My Bookings</h1>
         <p className="text-gray-500">
-          Manage your venue reservations and payments
+          Manage your venue reservations and view booking details
         </p>
       </div>
 
-      {bookings.length === 0 ? (
-        <p className="text-center text-gray-600">You have no bookings yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {bookings.map((b) => (
-            <BookingCard
-              key={b.bookingId}
-              booking={b}
-              onCancel={() => {
-                setCancelData({ bookingId: b.bookingId });
-                setIsCancelModalOpen(true);
-              }}
-              onReview={() => {
-                setReviewData({ venueId: b.venue.venueId });
-                setIsReviewModalOpen(true);
-              }}
-              onPayment={() => {
-                setPaymentData({
-                  bookingId: b.bookingId,
-                  venuename: b.venue.name,
-                  totalprice: b.totalPrice,
-                });
-                setIsPaymentModalOpen(true);
-              }}
-            />
-          ))}
-        </div>
-      )}
+      {/* ✅ Clean Table */}
+      <div className="overflow-x-auto bg-white shadow-xl rounded-2xl p-6">
+        {bookings.length === 0 ? (
+          <p className="text-center text-gray-600 py-6">
+            You have no bookings yet.
+          </p>
+        ) : (
+          <table className="w-full text-sm text-left border border-gray-200 rounded-lg">
+            <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
+              <tr>
+                <th className="px-4 py-3">Venue</th>
+                <th className="px-4 py-3">Location</th>
+                <th className="px-4 py-3">Date</th>
+                <th className="px-4 py-3">Duration</th>
+                <th className="px-4 py-3">Price</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.map((b) => (
+                <tr
+                  key={b.bookingId}
+                  className="border-b hover:bg-gray-50 transition-all"
+                >
+                  <td className="px-4 py-3 font-medium text-gray-800">
+                    {b.venue?.name}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {b.venue?.location}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {new Date(b.bookingDate).toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {b.timeDuration === "PerHour"
+                      ? `${b.durationHours} hr`
+                      : b.timeDuration === "PerDay"
+                      ? `${b.durationDays} day${
+                          b.durationDays > 1 ? "s" : ""
+                        }`
+                      : b.timeDuration === "PerEvent"
+                      ? "Full Day (24 hr)"
+                      : b.timeDuration === "Custom"
+                      ? b.durationHours
+                        ? `${b.durationHours} hr custom`
+                        : `${b.durationDays} day custom`
+                      : "-"}
+                  </td>
+                  <td className="px-4 py-3 font-semibold text-gray-800">
+                    ₹{b.totalPrice.toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`px-3 py-1 text-xs rounded-full font-medium ${
+                        b.status === "Pending"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : b.status === "Approved"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {b.status}
+                    </span>
+                  </td>
 
-      {isReviewModalOpen && (
-        <ReviewModal
-          data={reviewData}
-          onClose={() => setIsReviewModalOpen(false)}
+                  {/* ✅ Beautiful View Details Button */}
+                  <td className="px-4 py-3 text-center">
+                    <button
+                      onClick={() => {
+                        setSelectedBooking(b);
+                        setIsViewModalOpen(true);
+                      }}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-full shadow-md hover:bg-green-700 hover:shadow-lg transition-all duration-300"
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* ✅ View Details Modal */}
+      {isViewModalOpen && selectedBooking && (
+        <BookingDetailsModal
+          booking={selectedBooking}
+          onClose={() => {
+            setIsViewModalOpen(false);
+            setSelectedBooking(null);
+          }}
           refresh={fetchBookings}
-        />
-      )}
-
-      {isCancelModalOpen && (
-        <CancelModal
-          data={cancelData}
-          onClose={() => setIsCancelModalOpen(false)}
-          refresh={fetchBookings}
-        />
-      )}
-
-      {isPaymentModalOpen && (
-        <PaymentModal
-          booking={paymentData} // ✅ Correct prop name
-          onClose={() => setIsPaymentModalOpen(false)}
-          onPaymentUpdate={fetchBookings}
         />
       )}
     </div>

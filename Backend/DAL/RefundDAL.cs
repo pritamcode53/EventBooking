@@ -176,8 +176,9 @@ public class RefundDAL
         ";
 
         string cancelledFilter = excludeRefunded
-            ? "AND cb.cancelled_id NOT IN (SELECT cancelledid FROM refunds)"
-            : "";
+    ? "AND cb.cancelled_id NOT IN (SELECT cancelledid FROM refunds WHERE cancelledid IS NOT NULL)"
+    : "";
+
 
         string rejectedFilter = excludeRefunded
             ? "AND b.bookingid NOT IN (SELECT bookingid FROM refunds)"
